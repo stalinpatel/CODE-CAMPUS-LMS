@@ -8,11 +8,11 @@ const CoursesSection = () => {
   const { allCourses } = useContext(AppContext)
 
   return (
-    <div className='py-16 md:px-40 px-8'>
+    <div className='py-16 px-10  md:px-20 lg:px-32 0'>
       <h2 className='text-3xl font-medium text-gray-800'>Learn from the best</h2>
       <p className='text-sm md:text-base text-gray-500 mt-3'>Discover our top-rated course across various categories. From coding and design to business and wellness, our courses are crafted to deliver results. </p>
 
-      <div>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-4 gap-4 md:my-16 my-10   content-center w-full  justify-between'>
         {
           allCourses.slice(0, 4).map((course, index) => {
             return <CoursesCard key={index} course={course} />

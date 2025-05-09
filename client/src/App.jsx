@@ -32,7 +32,7 @@ const App = () => {
         <Route path='/' element={<Home />} />
         <Route path='/course-list' element={<CoursesList />} />
         <Route path='/course-list/:input' element={<CoursesList />} />
-        <Route path='/course-details/:id' element={<CourseDetails />} />
+        <Route path='/course/:id' element={<CourseDetails />} />
         <Route path='/my-enrollments/:id' element={<MyEnrollments />} />
         <Route path='/player/:courseId' element={<Player />} />
         <Route path='/loading/:path' element={<Loading />} />
@@ -43,7 +43,6 @@ const App = () => {
           <Route path='my-courses' element={<MyCourses />} />
           <Route path='student-enrolled' element={<StudentsEnrolled />} />
         </Route>
-
       </Routes>
     </div>
   );
@@ -54,11 +53,11 @@ export default App;
 
 /*
 ADDED
-1- context and setup
-2-routes
-3- changed RAFCE snippet
-4- clerk integratin 
-5- Navbar setup (login logout)
-6-components hero, dummycards , companies list
+1- responsiveness of course cards
+2- testimonial section
+3- call to action section
+4- Footer
+5- Course list page with search bar courselist and footer
+6- 
 
  */

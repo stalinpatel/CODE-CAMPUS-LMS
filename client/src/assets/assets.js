@@ -50,7 +50,6 @@ const assets = {
   microsoftLogo: microsoftLogoImg,
   paypalLogo: paypalLogoImg,
   walmartLogo: walmartLogoImg,
-
   addIcon: addIconImg,
   appointmentsIcon: appointmentsIconImg,
   arrowIcon: arrowIconImg,
@@ -96,6 +95,7 @@ const assets = {
 
 export const courses = [
   {
+    _id: 4,
     image: course1Img,
     title: "Cloud Computing Essentials",
     instructor: "GreatStack",
@@ -105,6 +105,7 @@ export const courses = [
     discount: 10,
   },
   {
+    _id: 3,
     image: course2Img,
     title: "AI Chatbot Development",
     instructor: "CodeCraft",
@@ -114,6 +115,7 @@ export const courses = [
     discount: 40,
   },
   {
+    _id: 2,
     image: course3Img,
     title: "MERN Stack Mastery",
     instructor: "DevTrail",
@@ -123,6 +125,7 @@ export const courses = [
     discount: 30,
   },
   {
+    _id: 1,
     image: course4Img,
     title: "Designing with React & Tailwind",
     instructor: "UI Fusion",
@@ -130,6 +133,49 @@ export const courses = [
     reviews: 22,
     price: 49.99,
     discount: 20,
+  },
+];
+
+export const dummyTestimonial = [
+  {
+    name: "Donald Jackman",
+    role: "SME 1 @ Amazon",
+    image: assets.profileImg1,
+    rating: 5,
+    feedback:
+      "I've been using Imagify for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier.",
+  },
+  {
+    name: "Sarah Chen",
+    role: "Digital Marketer @ Google",
+    image: assets.profileImg2,
+    rating: 4,
+    feedback:
+      "Imagify has transformed our social media workflow. The batch processing feature saves us hours every week!",
+  },
+  {
+    name: "Michael Rodriguez",
+    role: "Content Creator",
+    image: assets.profileImg3,
+    rating: 5,
+    feedback:
+      "As a solo creator, I need tools that just work. Imagify delivers consistently with no learning curve.",
+  },
+  {
+    name: "Emily Wilson",
+    role: "UX Designer @ Meta",
+    image: assets.profileImg4,
+    rating: 4,
+    feedback:
+      "The AI enhancements in Imagify produce professional results that impress both my team and clients.",
+  },
+  {
+    name: "James Park",
+    role: "Photography Director",
+    image: assets.profileImg5,
+    rating: 5,
+    feedback:
+      "We switched our entire studio to Imagify and saw a 30% increase in productivity within the first month.",
   },
 ];
 
