@@ -53,11 +53,11 @@ export default App;
 
 /*
 ADDED
-1- responsiveness of course cards
-2- testimonial section
-3- call to action section
-4- Footer
-5- Course list page with search bar courselist and footer
+1-fixed testmonial padding issue
+2-
+3-
+4-
+5-
 6- 
 
  */

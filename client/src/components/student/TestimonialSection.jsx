@@ -8,9 +8,9 @@ const TestimonialSection = () => {
     <div className='pb-8 px-8 md:px-0'>
       <h2 className='text-3xl font-medium text-gray-800'> Testimonials </h2>
       <p className='md:text-base text-gray-500 mt-3'>Hear from our learners as they share their journeys of transformation ,success,and how our <br /> platform has made  a difference in their lives.</p>
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-4 gap-4 md:my-16 my-10   content-center w-full  justify-between mt-14  '>
+      <div className='grid grid-cols-1 w-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 px-5 sm:px-20 md:px-30 lg:px-40 gap-4 md:my-16 my-10   content-center   mt-14  '>
         {
-          dummyTestimonial.slice(0, 4).map((testimonial, index) => {
+          dummyTestimonial.slice(0, 3).map((testimonial, index) => {
             return (
               <div className='text-sm text-left border border-gray-500/30 pb-6 rounded-lg bg-white shadow-[0px_4px_15px_0px] shadow-black/5 overflow-hidden' key={index}>
                 <div className=' flex flex-col '>
