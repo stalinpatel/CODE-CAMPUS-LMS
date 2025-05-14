@@ -5,10 +5,11 @@ import assets from '../../assets/assets';
 import YouTube from "react-youtube"
 import CourseDetailsSkeleton from "../../components/student/CourseDetailsSkeleton"
 import Footer from '../../components/student/Footer';
+import Spinner from '../../components/student/Spinner';
 
 const CourseDetails = () => {
     const { id } = useParams();
-    const { allCourses, getRatingDetails, formatDuration, handlePlural, getPriceDetails } = useContext(AppContext)
+    const { allCourses, getRatingDetails, formatDuration, handlePlural, getPriceDetails, calculatePlaybackDetails } = useContext(AppContext)
     const [openedContents, setOpenedContents] = useState([])
     const [courseData, setCourseData] = useState(null)
     const [isEnrolled, setIsEnrolled] = useState(false)
@@ -21,32 +22,7 @@ const CourseDetails = () => {
         }
     }, [allCourses, id]); // 👈 Add dependencies so it re-runs when allCourses is ready
 
-    const calculatePlaybackDetails = () => {
-        if (!courseData || courseData.courseContent.length === 0) {
-            return { hours: 0, minutes: 0, chapterWiseDuration: [] };
-        }
 
-        const chapterWiseDuration = [];
-        let totalSeconds = 0;
-        let lessonCount = 0;
-
-        courseData.courseContent.forEach((chapter, index) => {
-            const chapterSeconds = chapter.chapterContent.reduce((sum, lecture) => {
-                lessonCount++;
-                return sum + lecture.lectureDuration;
-            }, 0);
-            chapterWiseDuration[index] = chapterSeconds;
-            totalSeconds += chapterSeconds;
-        });
-
-
-        return {
-            lessonCount,
-            sectionsCount: courseData.courseContent.length,
-            courseDuration: totalSeconds,
-            chapterWiseDuration,
-        };
-    };
     const toggleDropdown = (chapterId) => {
         setOpenedContents((prev) =>
             prev.includes(chapterId)
@@ -76,12 +52,15 @@ const CourseDetails = () => {
 
     const ratingDetails = courseData ? getRatingDetails(courseData.courseRatings) : null;
     const priceDetails = courseData ? getPriceDetails(courseData) : null;
-    const playbackDetails = courseData ? calculatePlaybackDetails() : null
+    const playbackDetails = courseData ? calculatePlaybackDetails(courseData) : null
 
 
     if (!courseData) {
         return <CourseDetailsSkeleton />
     }
+    // if (true) {
+    //     return <Spinner />
+    // }
 
 
     return (
@@ -164,7 +143,7 @@ const CourseDetails = () => {
                         </div>
                     </div>
                 </div>
-                <div className=" z-10  rounded-t-2xl  md:rounded-none overflow-hidden w-full bg-white sm:min-w-96  shadow-gray-300/70 shadow-lg ">
+                <div className=" z-10  rounded-t-2xl  md:rounded-lg overflow-hidden w-full lg:w-132 sm:min-w-96 bg-white  shadow-gray-300/70 shadow-lg ">
                     {
                         playerData
                             ? <div className="relative w-full aspect-video ">
@@ -172,7 +151,7 @@ const CourseDetails = () => {
                                     <div className="absolute inset-0 bg-gray-200 flex items-center justify-center z-10">
                                         <img src={courseData.courseThumbnail} alt="loading thumbnail" className="w-full h-full object-cover absolute inset-0" />
                                         <div className="z-20 bg-white/70 backdrop-blur-sm p-3 rounded">
-                                            <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                                            <Spinner />
                                         </div>
                                     </div>
                                 )}

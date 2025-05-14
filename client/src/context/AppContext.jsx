@@ -9,10 +9,22 @@ export const AppContextProvider = (props) => {
     const navigate = useNavigate();
     const [allCourses, setAllCourses] = useState([])
     const [isEducator, setIsEducator] = useState(true)
+    const [enrolledCourses, setEnrolledCourses] = useState([])
 
     const fetchAllCourses = async () => {
         setAllCourses(courses)
     }
+    const fetchEnrolledCourses = async () => {
+        console.log('enrolled courses fetched');
+
+        setEnrolledCourses(courses)
+    }
+    useEffect(() => {
+
+        fetchAllCourses(),
+            fetchEnrolledCourses();
+    }, [])
+
     const getStars = (count) =>
         Array.from({ length: 5 }, (_, i) => (
             <span key={i} className={i < count ? "text-orange-400" : "text-gray-300"}>
@@ -62,12 +74,51 @@ export const AppContextProvider = (props) => {
             return output + "s"
         }
     }
+    const calculateTotalCourseDuration = (courseData) => {
+        if (!courseData || courseData.courseContent.length === 0) {
+            return "0h 0m";
+        }
 
-    useEffect(() => { fetchAllCourses() }, [])
+        let totalSeconds = 0;
 
+        courseData.courseContent.forEach((chapter, index) => {
+            const chapterSeconds = chapter.chapterContent.reduce((sum, lecture) => {
+                return sum + lecture.lectureDuration;
+            }, 0);
+            totalSeconds += chapterSeconds;
+        });
+        const courseDuration = formatDuration(totalSeconds)
+        return courseDuration;
+    };
+    const calculatePlaybackDetails = (courseData) => {
+        if (!courseData || courseData.courseContent.length === 0) {
+            return { hours: 0, minutes: 0, chapterWiseDuration: [] };
+        }
+
+        const chapterWiseDuration = [];
+        let totalSeconds = 0;
+        let lessonCount = 0;
+
+        courseData.courseContent.forEach((chapter, index) => {
+            const chapterSeconds = chapter.chapterContent.reduce((sum, lecture) => {
+                lessonCount++;
+                return sum + lecture.lectureDuration;
+            }, 0);
+            chapterWiseDuration[index] = chapterSeconds;
+            totalSeconds += chapterSeconds;
+        });
+
+
+        return {
+            lessonCount,
+            sectionsCount: courseData.courseContent.length,
+            courseDuration: totalSeconds,
+            chapterWiseDuration,
+        };
+    };
 
     const value = {
-        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails
+        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails
     }
 
     return (

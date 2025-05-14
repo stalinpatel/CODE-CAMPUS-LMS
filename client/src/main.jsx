@@ -24,4 +24,11 @@ createRoot(document.getElementById('root')).render(
 )
 
 
-// start from number of lessons
+/**
+ * COMPLETED STUDENT PAGES WITH
+ * 1-my enrollment page with responsiveness
+ * 2-player page with functionalities
+ * 3-Rating feature
+ * 
+ 
+ */
