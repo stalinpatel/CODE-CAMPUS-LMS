@@ -25,10 +25,10 @@ createRoot(document.getElementById('root')).render(
 
 
 /**
- * COMPLETED STUDENT PAGES WITH
- * 1-my enrollment page with responsiveness
- * 2-player page with functionalities
- * 3-Rating feature
+ * 
+ * completed all pages of educator dashbord moving to backend
+ * 
+ * 
  * 
  
  */

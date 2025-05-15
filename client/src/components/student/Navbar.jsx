@@ -20,7 +20,7 @@ const Navbar = () => {
                 <div className='flex items-center md:gap-2 lg:gap-3 '>
                     {
                         user && <>
-                            <button>Become Educator</button>
+                            <Link to={"/educator"}>Educator Dashbord</Link>
                             |
                             <Link to={'/my-enrollments/3'}>My Enrollments</Link>
                         </>

@@ -14,6 +14,7 @@ import StudentsEnrolled from "./pages/educator/StudentsEnrolled"
 import MyCourses from './pages/educator/MyCourses';
 import StudentNavbar from './components/student/Navbar';
 import educatorNavbar from './components/educator/Navbar';
+import 'quill/dist/quill.snow.css';
 
 
 const App = () => {
@@ -38,7 +39,7 @@ const App = () => {
         <Route path='/loading/:path' element={<Loading />} />
 
         <Route path='/educator' element={<Educator />}>
-          <Route path='educator' element={<Dashbord />} />
+          <Route index element={<Dashbord />} />  {/* This gets rendered at /educator */}
           <Route path='add-course' element={<AddCourse />} />
           <Route path='my-courses' element={<MyCourses />} />
           <Route path='student-enrolled' element={<StudentsEnrolled />} />
