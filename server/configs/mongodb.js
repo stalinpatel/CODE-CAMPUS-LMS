@@ -3,8 +3,14 @@ import mongoose from "mongoose";
 // connect to database
 
 const connectDB = async () => {
-  mongoose.connection.on("connected", () => console.log("Database connected"));
-  await mongoose.connect(`${process.env.MONGODB_URI}/lms`);
+  mongoose
+    .connect(`${process.env.MONGODB_URI}/lms`)
+    .then(() => {
+      console.log("Connected to MongoDB ✅");
+    })
+    .catch((err) => {
+      console.error("MongoDB Connection Error ❌:", err.message);
+    });
 };
 
 export default connectDB;
