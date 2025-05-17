@@ -12,7 +12,9 @@ export const clerkWebhooks = async (req, res) => {
     const payload = req.body;
 
     // ✅ CONVERT BUFFER TO STRING FOR VERIFICATION
-    const bodyStr = payload.toString();
+    const bodyStr = Buffer.isBuffer(payload)
+      ? payload.toString()
+      : JSON.stringify(payload); // fallback when using Postman or dev testing
 
     // ✅ EXTRACT SVIX SIGNATURE HEADERS
     const headers = {

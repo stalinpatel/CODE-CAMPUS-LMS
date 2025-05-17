@@ -1,12 +1,17 @@
 import { createContext, useEffect, useState } from "react";
 import { courses } from "../assets/assets";
-import { useNavigate } from "react-router-dom";
+import { useFetcher, useNavigate } from "react-router-dom";
+import { useAuth, useUser } from "@clerk/clerk-react"
 
 export const AppContext = createContext()
 
 export const AppContextProvider = (props) => {
     const currency = import.meta.env.VITE_CURRENCY;
     const navigate = useNavigate();
+    const { getToken } = useAuth();
+    const { user } = useUser();
+
+
     const [allCourses, setAllCourses] = useState([])
     const [isEducator, setIsEducator] = useState(true)
     const [enrolledCourses, setEnrolledCourses] = useState([])
@@ -19,11 +24,18 @@ export const AppContextProvider = (props) => {
 
         setEnrolledCourses(courses)
     }
+    const logToken = async () => {
+        console.log("Token : ", await getToken());
+    }
     useEffect(() => {
-
         fetchAllCourses(),
             fetchEnrolledCourses();
     }, [])
+    useEffect(() => {
+        if (user) {
+            logToken();
+        }
+    }, [user])
 
     const getStars = (count) =>
         Array.from({ length: 5 }, (_, i) => (
