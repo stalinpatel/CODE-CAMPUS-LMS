@@ -8,10 +8,11 @@ const app = express();
 
 await connectDB();
 
+app.post("/clerk", express.raw({ type: "*/*" }), clerkWebhooks); //put it before the express.json()
+
 app.use(cors());
 app.use(express.json()); // default parser
 
-app.post("/clerk", express.raw({ type: "*/*" }), clerkWebhooks);
 app.get("/", (req, res) => res.send("API working"));
 
 const PORT = process.env.PORT || 5000;
