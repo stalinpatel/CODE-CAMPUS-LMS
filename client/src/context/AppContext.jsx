@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { courses } from "../assets/assets";
 import { useFetcher, useNavigate } from "react-router-dom";
 import { useAuth, useUser } from "@clerk/clerk-react"
+import axios from "../utils/axios.js";
 
 export const AppContext = createContext()
 
@@ -18,6 +19,13 @@ export const AppContextProvider = (props) => {
 
     const fetchAllCourses = async () => {
         setAllCourses(courses)
+        // try {
+        //     const res = await axios.get("/course/all")
+        //     console.log('res:', res);
+
+        // } catch (error) {
+        //     console.log('Error in fetchAllCourses ', error);
+        // }
     }
     const fetchEnrolledCourses = async () => {
         console.log('enrolled courses fetched');
@@ -31,11 +39,11 @@ export const AppContextProvider = (props) => {
         fetchAllCourses(),
             fetchEnrolledCourses();
     }, [])
-    useEffect(() => {
-        if (user) {
-            logToken();
-        }
-    }, [user])
+    // useEffect(() => {
+    //     if (user) {
+    //         logToken();
+    //     }
+    // }, [user])
 
     const getStars = (count) =>
         Array.from({ length: 5 }, (_, i) => (

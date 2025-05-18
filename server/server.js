@@ -35,3 +35,5 @@ app.get("/", (req, res) => res.send("API working"));
 app.listen(PORT, () => {
   console.log(`Server is running on port: http://localhost:${PORT}`);
 });
+
+// go to add course controller

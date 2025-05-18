@@ -239,6 +239,16 @@ export const dummyEducatorData = {
 //     discount: 20,
 //   },
 // ];
+/**
+     * courseTitle
+     * coursePrice
+     * discount
+     * courseThumbnail
+     * courseDescription
+     * courseContent
+     * 
+     * 
+     */
 export const courses = [
   {
     _id: "605c72efb3f1c2b1f8e4e1a1",

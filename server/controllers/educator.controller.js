@@ -29,10 +29,10 @@ export const updateRoleEducator = async (req, res) => {
 export const addCourse = async (req, res) => {
   try {
     const courseData = req.body;
-    const imageFile = req.file;
+    const courseThumbnail = req.file;
     const educatorId = req.auth.userId;
 
-    if (!imageFile) {
+    if (!courseThumbnail) {
       return res
         .status(400)
         .json({ success: false, message: "Thumbnail not attached" });
@@ -43,12 +43,32 @@ export const addCourse = async (req, res) => {
         .status(400)
         .json({ success: false, message: "All fields are required" });
     }
-    console.log("Raw courseData:", req.body.courseData);
-
     let parsedCourseData = courseData;
-    console.log("parsedCourseData", parsedCourseData);
-    const { courseTitle, courseDescription, coursePrice, discount } =
-      parsedCourseData;
+
+    // parse main body if needed
+    if (typeof courseData === "string") {
+      parsedCourseData = JSON.parse(courseData);
+    }
+
+    // Clean the weird prototype
+    parsedCourseData = { ...parsedCourseData };
+
+    // Parse courseContent separately
+    if (typeof parsedCourseData.courseContent === "string") {
+      parsedCourseData.courseContent = JSON.parse(
+        parsedCourseData.courseContent
+      );
+    }
+
+    parsedCourseData.educator = educatorId;
+
+    const {
+      courseTitle,
+      courseDescription,
+      courseContent, //start from here ,convert to normal object -stringified
+      coursePrice,
+      discount,
+    } = parsedCourseData;
 
     if (
       !courseTitle ||
@@ -61,18 +81,16 @@ export const addCourse = async (req, res) => {
         message: "All required fields must be provided.",
       });
     }
-    if (typeof courseData === "string") {
-      parsedCourseData = JSON.parse(courseData);
-    }
 
-    parsedCourseData.educator = educatorId;
+    console.log("Parsed data :", parsedCourseData);
 
-    const newCourse = await Course.create(parsedCourseData);
+    // const newCourse = await Course.create(parsedCourseData);
 
-    const imageUpload = await cloudinary.uploader.upload(imageFile.path);
-    newCourse.courseThumbnail = imageUpload.secure_url;
-    await newCourse.save();
-    res
+    // const imageUpload = await cloudinary.uploader.upload(courseThumbnail.path);
+    // newCourse.courseThumbnail = imageUpload.secure_url;
+    // await newCourse.save();
+
+    return res
       .status(200)
       .json({ success: true, message: "Course created successfully" });
   } catch (error) {
@@ -82,7 +100,7 @@ export const addCourse = async (req, res) => {
 };
 
 // GET EDUCATOR COURSES
-const getEducatorCourses = async () => {
+export const getEducatorCourses = async () => {
   try {
     const educator = req.auth.userId;
     const courses = await Course.find({ educator });

@@ -2,16 +2,30 @@ import React, { useEffect, useRef, useState } from 'react';
 import uniqid from "uniqid";
 import Quill from 'quill';
 import assets from '../../assets/assets';
+import axios from '../../utils/axios.js';
 
 const AddCourse = () => {
     const editorRef = useRef(null);
     const quillRef = useRef(null);
 
+    /**
+     * courseTitle
+     * coursePrice
+     * discount
+     * courseThumbnail
+     * courseDescription
+     * courseContent
+     * 
+     * 
+     */
     const [courseTitle, setCourseTitle] = useState('');
     const [coursePrice, setCoursePrice] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [image, setImage] = useState(null);
+
+    const [courseDescription, setCourseDescription] = useState('');
     const [chapters, setChapters] = useState([]);
+
     const [showPopup, setShowPopup] = useState(false);
     const [currentChapterId, setCurrentChapterId] = useState(null);
     const [lectureDetails, setLectureDetails] = useState({
@@ -97,7 +111,19 @@ const AddCourse = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Your submission logic here
+        const formData = new FormData();
+        const sanitizedChapters = chapters.map(({ collapsed, ...rest }) => rest);
+
+        formData.append("courseTitle", courseTitle);
+        formData.append("coursePrice", coursePrice);
+        formData.append("discount", discount);
+        formData.append("courseDescription", courseDescription);
+        formData.append("courseThumbnail", image); // image is a File object
+
+        // If you want to add JSON-like nested data (like chapters array), stringify it:
+        formData.append("courseContent", JSON.stringify(sanitizedChapters));
+
+        const res = await axios.post("/educator/add-course", formData,)
     };
 
     useEffect(() => {
@@ -118,6 +144,11 @@ const AddCourse = () => {
                         [{ align: [] }],
                     ],
                 },
+            });
+            // Optional: Sync Quill changes to React state
+            quillRef.current.on('text-change', () => {
+                const html = quillRef.current.root.innerHTML;
+                setCourseDescription(html);
             });
         }
     }, []);
@@ -234,6 +265,7 @@ const AddCourse = () => {
                             <div className='flex justify-between items-center p-4 bg-gray-50 border-b'>
                                 <div className='flex items-center'>
                                     <button
+                                        type="button"
                                         onClick={() => handleChapter("toggle", chapter.chapterId)}
                                         className='mr-3 focus:outline-none'
                                         aria-label={chapter.collapsed ? 'Expand chapter' : 'Collapse chapter'}
@@ -254,6 +286,7 @@ const AddCourse = () => {
                                         {chapter.chapterContent.length} lecture{chapter.chapterContent.length !== 1 ? 's' : ''}
                                     </span>
                                     <button
+                                        type="button"
                                         onClick={() => handleChapter('remove', chapter.chapterId)}
                                         className='text-gray-500 hover:text-red-500 focus:outline-none'
                                         aria-label='Remove chapter'
@@ -289,6 +322,7 @@ const AddCourse = () => {
                                                 )}
                                             </div>
                                             <button
+                                                type="button"
                                                 onClick={() => handleLecture("remove", chapter.chapterId, lectureIndex)}
                                                 className='text-gray-400 hover:text-red-500 focus:outline-none'
                                                 aria-label='Remove lecture'
@@ -299,6 +333,7 @@ const AddCourse = () => {
                                     ))}
 
                                     <button
+                                        type="button"
                                         onClick={() => handleLecture("add", chapter.chapterId)}
                                         className='flex items-center gap-1 text-sm text-blue-500 hover:text-blue-700 mt-2'
                                     >
@@ -411,6 +446,7 @@ const AddCourse = () => {
             )}
         </div>
     );
+
 };
 
 export default AddCourse;

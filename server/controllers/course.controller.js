@@ -1,8 +1,9 @@
 import Course from "../models/Course.model.js";
 
 // GET ALL COURSES
-export const getAllCourses = async () => {
+export const getAllCourses = async (req, res) => {
   try {
+    console.log("get all courses hitted");
     const courses = await Course.find({ isPublished: true })
       .select(["-courseContent", "-enrolledStudents"])
       .populate({ path: "educator" });
@@ -12,7 +13,7 @@ export const getAllCourses = async () => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
-export const getCourseById = async () => {
+export const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
     const courseData = await Course.findById(id).populate({ path: "educator" });
