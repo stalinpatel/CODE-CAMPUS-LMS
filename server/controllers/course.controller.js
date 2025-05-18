@@ -6,10 +6,10 @@ export const getAllCourses = async () => {
     const courses = await Course.find({ isPublished: true })
       .select(["-courseContent", "-enrolledStudents"])
       .populate({ path: "educator" });
-    res.status(200).json({ success: true, courses });
+    return res.status(200).json({ success: true, courses });
   } catch (error) {
     console.error("error in getAllCourses controller", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 export const getCourseById = async () => {
@@ -24,16 +24,16 @@ export const getCourseById = async () => {
         }
       });
     });
-    res.status(200).json({ success: true, courseData });
+    return res.status(200).json({ success: true, courseData });
   } catch (error) {
     console.error("error in getAllCourses controller", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 export const asdf3 = async () => {
   try {
   } catch (error) {
     console.error("error in getAllCourses controller", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };

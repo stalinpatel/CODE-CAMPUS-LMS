@@ -7,6 +7,7 @@ import { clerkMiddleware } from "@clerk/express";
 import educatorRouter from "./routes/educator.routes.js";
 import courseRouter from "./routes/course.route.js";
 import { connectCloudinary } from "./configs/cloudinary.config.js";
+import userRouter from "./routes/user.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,7 @@ app.use(clerkMiddleware());
 //ROUTES
 app.use("/api/educator", educatorRouter);
 app.use("/api/course", courseRouter);
+app.use("/api/user", userRouter);
 
 //DEFAULT ROUTE
 app.get("/", (req, res) => res.send("API working"));

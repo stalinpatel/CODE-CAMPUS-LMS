@@ -21,7 +21,7 @@ export const updateRoleEducator = async (req, res) => {
       .json({ success: true, message: "You can publish a  course now" });
   } catch (error) {
     console.error("Clerk role update failed:", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -77,7 +77,7 @@ export const addCourse = async (req, res) => {
       .json({ success: true, message: "Course created successfully" });
   } catch (error) {
     console.error("Course creation failed:", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -86,13 +86,13 @@ const getEducatorCourses = async () => {
   try {
     const educator = req.auth.userId;
     const courses = await Course.find({ educator });
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       courses,
     });
   } catch (error) {
     console.error("error in getEducatorCourses controller", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -131,7 +131,7 @@ export const educatorDashboardData = async () => {
         });
       });
     }
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       dashboardData: {
         totalEarnings,
@@ -141,7 +141,7 @@ export const educatorDashboardData = async () => {
     });
   } catch (error) {
     console.error("error in educatorDashboardData controller", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -164,9 +164,9 @@ export const getEnrolledStudentsData = async () => {
       courseTitle: purchase.courseId.courseTitle,
       purchaseDate: purchase.createdAt,
     }));
-    res.status(200).json({ success: true, enrolledStudents });
+    return res.status(200).json({ success: true, enrolledStudents });
   } catch (error) {
     console.error("error in getEnrolledStudentsData controller", error);
-    res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
