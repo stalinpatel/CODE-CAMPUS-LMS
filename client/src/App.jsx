@@ -15,7 +15,7 @@ import MyCourses from './pages/educator/MyCourses';
 import StudentNavbar from './components/student/Navbar';
 import educatorNavbar from './components/educator/Navbar';
 import 'quill/dist/quill.snow.css';
-
+import { Bounce, ToastContainer } from 'react-toastify';
 
 const App = () => {
   const isEducatorRoute = useMatch('/educator/*')
@@ -23,6 +23,19 @@ const App = () => {
 
   return (
     <div className='text-default min-h-screen bg-white'>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
       {/* {
         isEducatorRoute ? <educatorNavbar /> : <studentNavbar />
       } */}

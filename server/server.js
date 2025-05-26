@@ -20,7 +20,12 @@ await connectCloudinary();
 app.post("/clerk", express.raw({ type: "*/*" }), clerkWebhooks); //put it before the express.json()
 
 //MIDDLEWARES
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(clerkMiddleware());
 

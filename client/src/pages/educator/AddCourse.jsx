@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import uniqid from "uniqid";
 import Quill from 'quill';
-import assets from '../../assets/assets';
+import assets from '../../assets/assets.js';
 import axios from '../../utils/axios.js';
+import { toast } from 'react-toastify';
+import Spinner from '../../components/student/Spinner.jsx';
 
 const AddCourse = () => {
     const editorRef = useRef(null);
@@ -18,6 +20,7 @@ const AddCourse = () => {
      * 
      * 
      */
+    const [buttonLoading, setButtonLoading] = useState(false)
     const [courseTitle, setCourseTitle] = useState('');
     const [coursePrice, setCoursePrice] = useState(0);
     const [discount, setDiscount] = useState(0);
@@ -111,6 +114,10 @@ const AddCourse = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!image) {
+            toast.error("Please add the Thumbnail", { id: thumbnail })
+            return;
+        }
         const formData = new FormData();
         const sanitizedChapters = chapters.map(({ collapsed, ...rest }) => rest);
 
@@ -122,8 +129,17 @@ const AddCourse = () => {
 
         // If you want to add JSON-like nested data (like chapters array), stringify it:
         formData.append("courseContent", JSON.stringify(sanitizedChapters));
-
-        const res = await axios.post("/educator/add-course", formData,)
+        try {
+            setButtonLoading(true)
+            const res = await axios.post("/educator/add-course", formData,)
+            console.log('Res :', res);
+            toast.success(res?.data?.message)
+        } catch (error) {
+            console.log('Error in handleSubmit uploading the image', error);
+            toast.error("Failed to upload image")
+        } finally {
+            setButtonLoading(false)
+        }
     };
 
     useEffect(() => {
@@ -356,9 +372,12 @@ const AddCourse = () => {
                 {/* Submit Button */}
                 <button
                     type="submit"
-                    className="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    disabled={buttonLoading}
+                    className="w-full flex items-center justify-center  md:w-60 px-8 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                    Create Course
+                    {
+                        buttonLoading ? <Spinner /> : "Create Course"
+                    }
                 </button>
             </form>
 

@@ -2,26 +2,27 @@ import { clerkClient } from "@clerk/express";
 import Course from "../models/Course.model.js";
 import Purchase from "../models/Purchase.model.js";
 import cloudinary from "../configs/cloudinary.config.js";
+import fs from "fs/promises";
 
-// UPDATE ROLE TO EDUCATOR
-export const updateRoleEducator = async (req, res) => {
+const uploadImageHelper = async (local_path) => {
   try {
-    const userId = req.auth.userId;
-
-    if (!req.auth || !req.auth.userId) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
-    await clerkClient.users.updateUserMetadata(userId, {
-      publicMetadata: {
-        role: "educator",
-      },
-    });
-    res
-      .status(200)
-      .json({ success: true, message: "You can publish a  course now" });
+    const imageUpload = await cloudinary.uploader.upload(local_path);
+    // After successful upload
+    await fs.unlink(local_path);
+    return imageUpload.secure_url;
   } catch (error) {
-    console.error("Clerk role update failed:", error);
-    return res.status(400).json({ success: false, message: error.message });
+    console.log("❌ Image upload failed:", error);
+    throw new Error("Image upload to Cloudinary failed.");
+  }
+};
+
+const inputChecks = (courseThumbnail, courseData, educatorId) => {
+  if (!courseThumbnail) {
+    throw new Error("Thumbnail not attached");
+  }
+
+  if (!courseData || !educatorId) {
+    throw new Error("All fields are required");
   }
 };
 
@@ -32,17 +33,8 @@ export const addCourse = async (req, res) => {
     const courseThumbnail = req.file;
     const educatorId = req.auth.userId;
 
-    if (!courseThumbnail) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Thumbnail not attached" });
-    }
+    inputChecks(courseThumbnail, courseData, educatorId);
 
-    if (!courseData || !educatorId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
-    }
     let parsedCourseData = courseData;
 
     // parse main body if needed
@@ -82,14 +74,20 @@ export const addCourse = async (req, res) => {
       });
     }
 
-    console.log("Parsed data :", parsedCourseData);
+    const image_url = await uploadImageHelper(courseThumbnail.path);
 
-    // const newCourse = await Course.create(parsedCourseData);
+    const newCourse = await Course.create({
+      courseTitle,
+      courseDescription,
+      courseThumbnail: image_url,
+      coursePrice,
+      discount,
+      courseContent,
+      educator: educatorId,
+    });
+    console.log("Stored data :", newCourse);
 
-    // const imageUpload = await cloudinary.uploader.upload(courseThumbnail.path);
-    // newCourse.courseThumbnail = imageUpload.secure_url;
-    // await newCourse.save();
-
+    console.log("Course created successfully");
     return res
       .status(200)
       .json({ success: true, message: "Course created successfully" });
@@ -99,8 +97,29 @@ export const addCourse = async (req, res) => {
   }
 };
 
+// UPDATE ROLE TO EDUCATOR
+export const updateRoleEducator = async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    await clerkClient.users.updateUserMetadata(userId, {
+      publicMetadata: {
+        role: "educator",
+      },
+    });
+    res
+      .status(200)
+      .json({ success: true, message: "You can publish a  course now" });
+  } catch (error) {
+    console.error("Clerk role update failed:", error);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
 // GET EDUCATOR COURSES
-export const getEducatorCourses = async () => {
+export const getEducatorCourses = async (req, res) => {
   try {
     const educator = req.auth.userId;
     const courses = await Course.find({ educator });
@@ -115,7 +134,7 @@ export const getEducatorCourses = async () => {
 };
 
 //GET EDUCATOR DASHBORD DATA
-export const educatorDashboardData = async () => {
+export const educatorDashboardData = async (req, res) => {
   try {
     const educator = req.auth.userId;
     const courses = await Course.find({ educator });
@@ -164,7 +183,7 @@ export const educatorDashboardData = async () => {
 };
 
 //GET ENROLLED STUDENTS DATA WITH PURCHASE DATA
-export const getEnrolledStudentsData = async () => {
+export const getEnrolledStudentsData = async (req, res) => {
   try {
     const educator = req.auth.userId;
     const courses = await Course.find({ educator });
