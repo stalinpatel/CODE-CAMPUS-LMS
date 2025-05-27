@@ -2,25 +2,19 @@ import React, { useContext, useEffect, useState } from "react";
 import Switch from "../../components/educator/Switch";
 import { AppContext } from "../../context/AppContext";
 import Loading from "../../components/student/Loading";
-
-const courses = [
-  {
-    id: 1,
-    title: "Build Text to image SaaS App in React JS",
-    image: "/course-thumb.png",
-    earnings: 150,
-    students: 25,
-    live: true,
-  },
-];
-
+import axiosInstance from "../../utils/axios.js";
 
 export default function MyCourses() {
   const { currency, allCourses } = useContext(AppContext)
   const [courses, setCourses] = useState(null)
 
   const fetchEducatorCourses = async () => {
-    setCourses(allCourses)
+    try {
+      const res = await axiosInstance.get("/educator/courses")
+      setCourses(res?.data?.courses)
+    } catch (error) {
+      console.log('Error Fetching my-courses :', error.message);
+    }
   }
   useEffect(() => {
     fetchEducatorCourses()

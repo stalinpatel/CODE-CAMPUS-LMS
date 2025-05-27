@@ -2,18 +2,28 @@ import React, { useEffect, useState } from "react";
 
 import { dummyStudentEnrolled } from "../../assets/assets";
 import Loading from "../../components/student/Loading";
+import axiosInstance from "../../utils/axios.js";
 
 
 
-export default function StudentsEnrolled() {
+const StudentsEnrolled = () => {
     const [enrolledStudents, setEnrolledStudents] = useState(null)
+    const [loading, setLoading] = useState(false);
 
     const fetchEnrolledStudents = async () => {
-        setEnrolledStudents(dummyStudentEnrolled)
+        try {
+            setLoading(true)
+            const res = await axiosInstance.get("/educator/enrolled-students")
+            setEnrolledStudents(res?.data)
+        } catch (error) {
+            console.log('Error Fetching enrolled students :', error.message);
+        } finally {
+            setLoading(false)
+        }
     }
     useEffect(() => {
         fetchEnrolledStudents()
-    }, [dummyStudentEnrolled])
+    }, [])
 
 
     // Format date function
@@ -21,7 +31,14 @@ export default function StudentsEnrolled() {
         const options = { day: 'numeric', month: 'short', year: 'numeric' };
         return new Date(dateString).toLocaleDateString('en-US', options);
     };
-    if (!enrolledStudents) {
+    if (!loading && enrolledStudents.length === 0) {
+        return (
+            <>
+                <h1 className="text-center mx-auto text-gray-700 py-40">No Students Enrolled </h1>
+            </>
+        )
+    }
+    if (loading) {
         return <Loading />
     }
     return (
@@ -115,3 +132,4 @@ export default function StudentsEnrolled() {
         </div>
     );
 }
+export default StudentsEnrolled

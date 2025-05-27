@@ -3,6 +3,7 @@ import { AppContext } from '../../context/AppContext';
 import { dummyDashboardData } from '../../assets/assets';
 import assets from '../../assets/assets.js';
 import Loading from '../../components/student/Loading';
+import axiosInstance from '../../utils/axios.js';
 
 const Dashbord = () => {
     const [dashbordData, setDashbordData] = useState(null);
@@ -10,7 +11,14 @@ const Dashbord = () => {
 
 
     const fetchDashbordData = async () => {
-        setDashbordData(dummyDashboardData);
+        try {
+            const res = await axiosInstance.get("/educator/dashboard")
+            console.log('res:', res.data);
+            setDashbordData(res?.data?.dashboardData)
+        } catch (error) {
+            console.log('Error Fetching Dashbord data :', error.message);
+            // setDashbordData(dummyDashboardData);
+        }
     };
 
     useEffect(() => {

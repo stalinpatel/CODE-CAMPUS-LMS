@@ -1,5 +1,6 @@
 import { clerkClient } from "@clerk/express";
 import Course from "../models/Course.model.js";
+import User from "../models/User.model.js";
 import Purchase from "../models/Purchase.model.js";
 import cloudinary from "../configs/cloudinary.config.js";
 import fs from "fs/promises";
@@ -85,7 +86,6 @@ export const addCourse = async (req, res) => {
       courseContent,
       educator: educatorId,
     });
-    console.log("Stored data :", newCourse);
 
     console.log("Course created successfully");
     return res

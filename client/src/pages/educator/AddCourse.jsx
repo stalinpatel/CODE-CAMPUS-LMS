@@ -134,6 +134,16 @@ const AddCourse = () => {
             const res = await axios.post("/educator/add-course", formData,)
             console.log('Res :', res);
             toast.success(res?.data?.message)
+            // ✅ Reset all form fields
+            setCourseTitle('');
+            setCoursePrice(0);
+            setDiscount(0);
+            setImage(null);
+            setCourseDescription('');
+            setChapters([]);
+            if (quillRef.current) {
+                quillRef.current.setContents([]); // Clears the editor
+            }
         } catch (error) {
             console.log('Error in handleSubmit uploading the image', error);
             toast.error("Failed to upload image")

@@ -8,7 +8,7 @@ const SideBar = () => {
         { name: 'Dashboard', path: '/educator', icon: assets.homeIcon },
         { name: 'Add Course', path: '/educator/add-course', icon: assets.addIcon },
         { name: 'My Courses', path: '/educator/my-courses', icon: assets.myCourseIcon },
-        { name: 'Student Enrolled', path: '/educator/student-enrolled', icon: assets.personTickIcon },
+        { name: 'Students Enrolled', path: '/educator/student-enrolled', icon: assets.personTickIcon },
     ];
 
     const { isEducator } = useContext(AppContext);

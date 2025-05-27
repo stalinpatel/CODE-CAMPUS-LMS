@@ -18,13 +18,13 @@ educatorRouter.post(
   protectEducator,
   upload.single("courseThumbnail"),
   addCourse
-);
-educatorRouter.get("/courses", protectEducator, getEducatorCourses);
+); //DONE
+educatorRouter.get("/courses", protectEducator, getEducatorCourses); //DONE
 educatorRouter.get("/dashboard", protectEducator, educatorDashboardData);
 educatorRouter.get(
   "/enrolled-students",
   protectEducator,
   getEnrolledStudentsData
-);
+); //DONE
 
 export default educatorRouter;
