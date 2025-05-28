@@ -23,7 +23,6 @@ export const userEnrolledCourses = async (req, res) => {
   try {
     const userId = req.auth.userId;
     const userData = await User.findById(userId).populate("enrolledCourses");
-
     return res
       .status(200)
       .json({ success: true, enrolledCourses: userData.enrolledCourses });

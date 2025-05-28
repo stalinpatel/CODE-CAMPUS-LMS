@@ -30,8 +30,8 @@ app.use(express.json());
 app.use(clerkMiddleware());
 
 //ROUTES
-app.use("/api/educator", educatorRouter);
-app.use("/api/course", courseRouter);
+app.use("/api/educator", educatorRouter); //DONE
+app.use("/api/course", courseRouter); //DONE
 app.use("/api/user", userRouter);
 
 //DEFAULT ROUTE

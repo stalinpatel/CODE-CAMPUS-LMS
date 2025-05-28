@@ -6,6 +6,7 @@ import YouTube from "react-youtube"
 import CourseDetailsSkeleton from "../../components/student/CourseDetailsSkeleton"
 import Footer from '../../components/student/Footer';
 import Spinner from '../../components/student/Spinner';
+import axiosInstance from '../../utils/axios';
 
 const CourseDetails = () => {
     const { id } = useParams();
@@ -15,10 +16,17 @@ const CourseDetails = () => {
     const [isEnrolled, setIsEnrolled] = useState(false)
     const [playerData, setPlayerData] = useState(null)
     const [isPlayerLoading, setIsPlayerLoading] = useState(true);
+    const fetchCourseData = async (id) => {
+        try {
+            const res = await axiosInstance.get(`course/${id}`)
+            setCourseData(res?.data?.courseData);
+        } catch (error) {
+            console.log('Error in geting Course Details', error);
+        }
+    }
     useEffect(() => {
         if (allCourses && allCourses.length > 0) {
-            const findCourse = allCourses.find(course => course._id === id);
-            setCourseData(findCourse);
+            fetchCourseData(id)
         }
     }, [allCourses, id]); // 👈 Add dependencies so it re-runs when allCourses is ready
 

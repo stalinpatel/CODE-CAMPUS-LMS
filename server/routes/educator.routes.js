@@ -12,7 +12,7 @@ import protectEducator from "../middlewares/auth.middleware.js";
 const educatorRouter = express.Router();
 
 // ADD EDUCATOR ROLE
-educatorRouter.get("/update-role", updateRoleEducator);
+educatorRouter.get("/update-role", updateRoleEducator); //DONE
 educatorRouter.post(
   "/add-course",
   protectEducator,
@@ -20,7 +20,7 @@ educatorRouter.post(
   addCourse
 ); //DONE
 educatorRouter.get("/courses", protectEducator, getEducatorCourses); //DONE
-educatorRouter.get("/dashboard", protectEducator, educatorDashboardData);
+educatorRouter.get("/dashboard", protectEducator, educatorDashboardData); //DONE
 educatorRouter.get(
   "/enrolled-students",
   protectEducator,

@@ -27,14 +27,14 @@ export const getCourseById = async (req, res) => {
     });
     return res.status(200).json({ success: true, courseData });
   } catch (error) {
-    console.error("error in getAllCourses controller", error);
+    console.error("error in getCourseById controller", error);
     return res.status(400).json({ success: false, message: error.message });
   }
 };
 export const asdf3 = async () => {
   try {
   } catch (error) {
-    console.error("error in getAllCourses controller", error);
+    console.error("error in getCourseById controller", error);
     return res.status(400).json({ success: false, message: error.message });
   }
 };

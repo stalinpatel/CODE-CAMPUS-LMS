@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { courses } from "../assets/assets";
 import { useFetcher, useNavigate } from "react-router-dom";
 import { useAuth, useUser } from "@clerk/clerk-react"
-import axios from "../utils/axios.js";
+import axiosInstance from "../utils/axios.js";
 
 export const AppContext = createContext()
 
@@ -12,38 +12,79 @@ export const AppContextProvider = (props) => {
     const { getToken } = useAuth();
     const { user } = useUser();
 
+    useEffect(() => {
+        const setupInterceptor = () => {
+            const interceptor = axiosInstance.interceptors.request.use(
+                async (config) => {
+                    const token = await getToken();
+                    if (token) {
+                        config.headers.Authorization = `Bearer ${token}`;
+                    }
+                    return config;
+                },
+                (error) => {
+                    return Promise.reject(error);
+                }
+            );
+
+            // Optional cleanup to prevent duplicate interceptors
+            return () => axiosInstance.interceptors.request.eject(interceptor);
+        };
+
+        const cleanup = setupInterceptor();
+        return cleanup;
+    }, [getToken]);
+
 
     const [allCourses, setAllCourses] = useState([])
-    const [isEducator, setIsEducator] = useState(true)
+    const [userData, setUserData] = useState(null)
+    const [isEducator, setIsEducator] = useState(false)
     const [enrolledCourses, setEnrolledCourses] = useState([])
 
+    // FETCH ALL COURSES
     const fetchAllCourses = async () => {
-        setAllCourses(courses)
-        // try {
-        //     const res = await axios.get("/course/all")
-        //     console.log('res:', res);
-
-        // } catch (error) {
-        //     console.log('Error in fetchAllCourses ', error);
-        // }
+        try {
+            const res = await axiosInstance.get("/course/all")
+            setAllCourses(res?.data?.courses)
+        } catch (error) {
+            console.log('Error in fetchAllCourses ', error);
+        }
     }
+
+    //FETCH ALL COURSES 
+    const fetchUserData = async () => {
+        if (user?.publicMetadata.role === 'educator') {
+            setIsEducator(true)
+        }
+        try {
+            const res = await axiosInstance.get("/user/data")
+            console.log(res.data)
+            // setAllCourses(res?.data)
+        } catch (error) {
+            console.log('Error in fetchUserData ', error);
+        }
+    }
+
+    //FETCH USER ENROLLED COURSES
     const fetchEnrolledCourses = async () => {
-        console.log('enrolled courses fetched');
+        try {
+            const res = await axiosInstance.get('/user/enrolled-courses')
+            setEnrolledCourses(res?.data?.enrolledCourses)
+        } catch ([error]) {
+            console.log("Error in fetching enrolled courses:", error)
+        }
+    }
 
-        setEnrolledCourses(courses)
-    }
-    const logToken = async () => {
-        console.log("Token : ", await getToken());
-    }
     useEffect(() => {
-        fetchAllCourses(),
-            fetchEnrolledCourses();
+        fetchAllCourses()
     }, [])
-    // useEffect(() => {
-    //     if (user) {
-    //         logToken();
-    //     }
-    // }, [user])
+
+    useEffect(() => {
+        if (user) {
+            fetchUserData()
+            fetchEnrolledCourses();
+        }
+    }, [user])
 
     const getStars = (count) =>
         Array.from({ length: 5 }, (_, i) => (
@@ -111,7 +152,7 @@ export const AppContextProvider = (props) => {
         return courseDuration;
     };
     const calculatePlaybackDetails = (courseData) => {
-        if (!courseData || courseData.courseContent.length === 0) {
+        if (!courseData || courseData?.courseContent?.length === 0) {
             return { hours: 0, minutes: 0, chapterWiseDuration: [] };
         }
 
@@ -138,7 +179,7 @@ export const AppContextProvider = (props) => {
     };
 
     const value = {
-        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails
+        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails, userData, setUserData
     }
 
     return (

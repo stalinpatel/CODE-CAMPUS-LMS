@@ -13,12 +13,15 @@ import Educator from "./pages/educator/Educator"
 import StudentsEnrolled from "./pages/educator/StudentsEnrolled"
 import MyCourses from './pages/educator/MyCourses';
 import StudentNavbar from './components/student/Navbar';
-import educatorNavbar from './components/educator/Navbar';
+import EducatorNavbar from './components/educator/Navbar';
 import 'quill/dist/quill.snow.css';
 import { Bounce, ToastContainer } from 'react-toastify';
+import { useContext } from 'react';
+import { AppContext } from './context/AppContext';
 
 const App = () => {
   const isEducatorRoute = useMatch('/educator/*')
+  const { isEducator } = useContext(AppContext)
 
 
   return (
@@ -37,7 +40,7 @@ const App = () => {
         transition={Bounce}
       />
       {/* {
-        isEducatorRoute ? <educatorNavbar /> : <studentNavbar />
+        isEducator ? <EducatorNavbar /> : <StudentNavbar />
       } */}
       {
         !isEducatorRoute && <StudentNavbar />

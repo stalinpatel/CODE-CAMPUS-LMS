@@ -138,6 +138,7 @@ const MyEnrollments = () => {
     { lectureCompleted: 8, totalLectures: 10 }
   ]);
 
+
   return (
     <>
       <div className='px-4 sm:px-8 md:px-36 pt-10'>
@@ -145,6 +146,10 @@ const MyEnrollments = () => {
 
         {/* Desktop Table */}
         <div className='hidden sm:block'>
+          {
+            enrolledCourses && enrolledCourses.length === 0 &&
+            (<h1 className='text-gray-700 text-xl text-center my-10 mx-auto '>No Course Enrolled</h1>)
+          }
           <table className='w-full table-auto border rounded-xl overflow-hidden'>
             <thead>
               <tr className='bg-gray-100'>
@@ -154,7 +159,9 @@ const MyEnrollments = () => {
                 <th className='px-4 py-3 text-left font-semibold'>Status</th>
               </tr>
             </thead>
+
             <tbody className='text-gray-700'>
+
               {enrolledCourses.map((course, index) => (
                 <tr key={index} className='border-b border-gray-300'>
                   <td className='px-4 py-3 flex items-center gap-3'>

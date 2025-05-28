@@ -6,7 +6,7 @@ import {
 
 const courseRouter = express.Router();
 
-courseRouter.get("/all", getAllCourses);
-courseRouter.get("/:id", getCourseById);
+courseRouter.get("/all", getAllCourses); //DONE
+courseRouter.get("/:id", getCourseById); //DONE
 
 export default courseRouter;

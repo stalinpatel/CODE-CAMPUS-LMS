@@ -9,8 +9,8 @@ import {
 
 const userRouter = express.Router();
 
-userRouter.get("/data", getUserData);
-userRouter.get("/enrolled-courses", userEnrolledCourses);
+userRouter.get("/data", getUserData); //DONE
+userRouter.get("/enrolled-courses", userEnrolledCourses); //DONE
 userRouter.post("update-course-progress", updateUserCourseProgress);
 userRouter.post("get-course-progress", getUserCourseProgress);
 userRouter.post("add-rating", addUserRating);

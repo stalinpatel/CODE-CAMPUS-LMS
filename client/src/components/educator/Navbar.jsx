@@ -19,9 +19,15 @@ const Navbar = () => {
             </Link>
             {/* Desktop view */}
             <div className='hidden md:flex items-center gap-5 text-gray-500 '>
-                <p>
-                    Hi! {user ? user.fullName : "Developers"}
-                </p>
+                {
+                    user && <>
+                        <Link to={"/educator"}>Dashboard</Link>
+                        |
+                        <p>
+                            Hi! {user ? user.fullName : "Developers"}
+                        </p>
+                    </>
+                }
                 {
                     user ? <UserButton /> :
                         <button onClick={() => openSignIn()} className='bg-blue-600 text-white px-5 py-2 rounded-full'>Create Account</button>
