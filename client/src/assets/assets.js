@@ -43,6 +43,8 @@ import uploadAreaImg from "./upload_area.svg";
 import userIconImg from "./user_icon.svg";
 import userIcon2Img from "./user_icon_2.svg";
 import walmartLogoImg from "./walmart_logo.svg";
+import paymentSuccessIcon from "./success.png";
+import paymentFailedIcon from "./failed.png";
 
 const assets = {
   accentureLogo: accentureLogoImg,
@@ -91,6 +93,8 @@ const assets = {
   uploadArea: uploadAreaImg,
   userIcon: userIconImg,
   userIcon2: userIcon2Img,
+  paymentSuccessIcon,
+  paymentFailedIcon,
 };
 
 export const dummyDashboardData = {
@@ -240,15 +244,15 @@ export const dummyEducatorData = {
 //   },
 // ];
 /**
-     * courseTitle
-     * coursePrice
-     * discount
-     * courseThumbnail
-     * courseDescription
-     * courseContent
-     * 
-     * 
-     */
+ * courseTitle
+ * coursePrice
+ * discount
+ * courseThumbnail
+ * courseDescription
+ * courseContent
+ *
+ *
+ */
 export const courses = [
   {
     _id: "605c72efb3f1c2b1f8e4e1a1",

@@ -21,7 +21,18 @@ const purchaseSchema = new mongoose.Schema(
       enum: ["pending", "completed", "failed"],
       default: "pending",
     },
-  }, 
+    razorpayOrderId: {
+      type: String,
+      required: true,
+    },
+    razorpayPaymentId: {
+      type: String,
+      required: true,
+    },
+    receiptId: {
+      type: String,
+    },
+  },
   { timestamps: true }
 );
 

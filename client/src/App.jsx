@@ -18,6 +18,8 @@ import 'quill/dist/quill.snow.css';
 import { Bounce, ToastContainer } from 'react-toastify';
 import { useContext } from 'react';
 import { AppContext } from './context/AppContext';
+import PaymentFailed from './pages/student/PaymentFailed';
+import PaymentSuccess from './pages/student/PaymentSuccess';
 
 const App = () => {
   const isEducatorRoute = useMatch('/educator/*')
@@ -53,6 +55,8 @@ const App = () => {
         <Route path='/my-enrollments/:id' element={<MyEnrollments />} />
         <Route path='/player/:courseId' element={<Player />} />
         <Route path='/loading/:path' element={<Loading />} />
+        <Route path='/payment-failed' element={<PaymentFailed />} />
+        <Route path='/payment-success' element={<PaymentSuccess />} />
 
         <Route path='/educator' element={<Educator />}>
           <Route index element={<Dashbord />} />  {/* This gets rendered at /educator */}

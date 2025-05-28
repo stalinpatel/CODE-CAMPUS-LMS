@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import assets from '../../assets/assets';
 import YouTube from "react-youtube"
@@ -7,15 +7,34 @@ import CourseDetailsSkeleton from "../../components/student/CourseDetailsSkeleto
 import Footer from '../../components/student/Footer';
 import Spinner from '../../components/student/Spinner';
 import axiosInstance from '../../utils/axios';
+import { toast } from "react-toastify"
+import { useUser } from '@clerk/clerk-react';
 
+const loadScript = (url) => {
+    return new Promise((resolve) => {
+        if (document.querySelector(`script[src="${url}"]`)) {
+            resolve(true);
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = url;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
 const CourseDetails = () => {
     const { id } = useParams();
-    const { allCourses, getRatingDetails, formatDuration, handlePlural, getPriceDetails, calculatePlaybackDetails } = useContext(AppContext)
+    const navigate = useNavigate();
+    const { user } = useUser();
+
+    const { allCourses, getRatingDetails, formatDuration, handlePlural, getPriceDetails, calculatePlaybackDetails, userData, setEnrollLoading, enrollLoading, setOrderDetails, orderDetails } = useContext(AppContext)
     const [openedContents, setOpenedContents] = useState([])
     const [courseData, setCourseData] = useState(null)
     const [isEnrolled, setIsEnrolled] = useState(false)
     const [playerData, setPlayerData] = useState(null)
     const [isPlayerLoading, setIsPlayerLoading] = useState(true);
+
     const fetchCourseData = async (id) => {
         try {
             const res = await axiosInstance.get(`course/${id}`)
@@ -24,13 +43,6 @@ const CourseDetails = () => {
             console.log('Error in geting Course Details', error);
         }
     }
-    useEffect(() => {
-        if (allCourses && allCourses.length > 0) {
-            fetchCourseData(id)
-        }
-    }, [allCourses, id]); // 👈 Add dependencies so it re-runs when allCourses is ready
-
-
     const toggleDropdown = (chapterId) => {
         setOpenedContents((prev) =>
             prev.includes(chapterId)
@@ -54,10 +66,126 @@ const CourseDetails = () => {
             videoId: url.split('/').pop()
         })
     }
-    const handleEnrollClick = () => {
-        console.log('Enroll clicked');
-    }
 
+    const verifyPayment = async (response) => {
+        try {
+            setEnrollLoading(true)
+            const res = await axiosInstance.post("/payment/verify-payment", {
+                response,
+                orderDetails
+            });
+            console.log("Order placed :", res.data?.order);
+            toast.success(res.data?.message || "Payment successful", {
+                id: "verify-payment",
+            });
+            setPaymentDetails(res.data?.order)
+            return { success: true };
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || "Payment couldn't be verified",
+                { id: "verify-payment" }
+            );
+            console.log("Error in verifyPayment :", error);
+            return false;
+        } finally {
+            setEnrollLoading(false)
+        }
+    }
+    const createOrder = async () => {
+        try {
+            setEnrollLoading(true)
+            const res = await axiosInstance.post("/payment/create-order", { id })
+            console.log('oder :', res.data.order);
+
+            setOrderDetails({
+                orderId: res.data.order.id,
+                receiptId: res.data.order.receipt,
+                amountInPaise: res.data.order.amount,
+                status: "created",
+                courseId: res.data.order?.notes.courseId,
+            })
+            return { success: true, order: res.data?.order }
+        } catch (error) {
+            console.log('Error in createOrder function', error);
+            return { success: false, }
+        } finally {
+            setEnrollLoading(false)
+        }
+    }
+    const handleEnrollClick = async () => {
+        if (!userData) {
+            toast.warn("Login to Enroll", { id: 1 })
+            return;
+        }
+        if (isEnrolled) {
+            toast.warn("Already Enrolled", { id: 2 })
+            return;
+        }
+        handleCheckout();
+    }
+    const handleCheckout = async () => {
+        try {
+            let res = await createOrder();
+            if (res.success) {
+                const razorpay_key_id = import.meta.env.VITE_RAZORPAY_KEY_ID;
+                const key = razorpay_key_id;
+                const paymentOptions = {
+                    "key": key,
+                    "amount": res.order.amount,
+                    "currency": res.order.currency,
+                    "name": "CodeCampus",
+                    "order_id": res.order.id,
+                    "handler": async (response) => {
+                        const res = await verifyPayment(response)
+                        if (res.success) {
+                            navigate("/payment-success")
+                        }
+                        console.log("handover to handleer function")
+                    },
+                    "prefill": {
+                        "name": user.fullName,
+                        "email": user?.emailAddresses[0].emailAddress,
+                        "contact": '9999999999'
+
+                    },
+                    "theme": {
+                        "color": "#bb03bb"
+                    }
+                }
+                const razorpayInstance = new Razorpay(paymentOptions);
+                razorpayInstance.on('payment.failed', function (response) {
+                    console.error('Payment failed:', response.error);
+                    toast.error("Payment failed. Please try again.");
+                    navigate("/payment-failed");
+                });
+                razorpayInstance.open();
+            } else {
+                navigate("/payment-failed");
+            }
+        } catch (error) {
+            console.log("Error creating order:", error);
+            toast.error("Failed to start checkout. Please try again.");
+            navigate("/payment-failed");
+        }
+    }
+    useEffect(() => {
+        fetchCourseData(id)
+    }, [id]);
+
+    useEffect(() => {
+        if (userData && courseData) {
+            setIsEnrolled(userData.enrolledCourses.includes(courseData._id))
+        }
+    }, [userData, courseData]);
+    useEffect(() => {
+        (async () => {
+            const scriptLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+            if (!scriptLoaded) {
+                alert("Failed to load Razorpay SDK. Please check your internet connection.");
+                return;
+            }
+        })()
+    }, [])
     const ratingDetails = courseData ? getRatingDetails(courseData.courseRatings) : null;
     const priceDetails = courseData ? getPriceDetails(courseData) : null;
     const playbackDetails = courseData ? calculatePlaybackDetails(courseData) : null
@@ -66,10 +194,6 @@ const CourseDetails = () => {
     if (!courseData) {
         return <CourseDetailsSkeleton />
     }
-    // if (true) {
-    //     return <Spinner />
-    // }
-
 
     return (
         <>
@@ -93,7 +217,7 @@ const CourseDetails = () => {
                             handlePlural(courseData?.enrolledStudents?.length, "student")
                         }</p>
                     </div>
-                    <a href='/' className="text-sm">Course by <span className="text-blue-600 underline">GreatStack</span></a>
+                    <a href='/' className="text-sm">Course by <span className="text-blue-600 underline">{courseData?.educator.name}</span></a>
                     <div className="pt-8 text-gray-800">
                         <h2 className="text-xl font-semibold">Course Structure</h2>
                         <div className=' text-gray-600 text-sm pt-2' >
@@ -206,7 +330,14 @@ const CourseDetails = () => {
                         <button
                             disabled={isEnrolled}
                             onClick={() => handleEnrollClick()}
-                            className={`md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium ${isEnrolled ? "cursor-not-allowed" : "cursor-pointer"}`}>{isEnrolled ? "Already Enrolled" : "Enroll Now"}
+                            className={`md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium ${isEnrolled ? "cursor-not-allowed" : "cursor-pointer"}`}>
+
+                            {enrollLoading
+                                ? (<div className='w-full flex items-center justify-center'><Spinner /></div>) : isEnrolled
+                                    ? "Already Enrolled" : "Enroll Now"}
+
+
+
                         </button>
                         <div className="pt-6">
                             <p className="md:text-xl text-lg font-medium text-gray-800">What's in the course?</p>

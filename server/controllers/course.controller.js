@@ -1,4 +1,5 @@
 import Course from "../models/Course.model.js";
+import User from "../models/User.model.js";
 
 // GET ALL COURSES
 export const getAllCourses = async (req, res) => {
@@ -13,6 +14,8 @@ export const getAllCourses = async (req, res) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+
+//GET SPECIFIC COURSE DETAILS
 export const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -26,13 +29,6 @@ export const getCourseById = async (req, res) => {
       });
     });
     return res.status(200).json({ success: true, courseData });
-  } catch (error) {
-    console.error("error in getCourseById controller", error);
-    return res.status(400).json({ success: false, message: error.message });
-  }
-};
-export const asdf3 = async () => {
-  try {
   } catch (error) {
     console.error("error in getCourseById controller", error);
     return res.status(400).json({ success: false, message: error.message });

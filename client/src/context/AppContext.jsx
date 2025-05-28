@@ -40,6 +40,25 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(null)
     const [isEducator, setIsEducator] = useState(false)
     const [enrolledCourses, setEnrolledCourses] = useState([])
+    const [enrollLoading, setEnrollLoading] = useState(false)
+    const [paymentDetails, setPaymentDetails] = useState({
+        orderId: "",
+        receiptId: "",
+        amount: 0,
+        status: "Initiated",
+        paidAt: "",
+    })
+    const [orderDetails, setOrderDetails] = useState({
+        orderId: "",
+        receiptId: "",
+        amountInPaise: "",
+        status: "created",
+        courseId: ""
+    })
+
+    useEffect(() => {
+        console.log('orderdetails', orderDetails);
+    }, [orderDetails])
 
     // FETCH ALL COURSES
     const fetchAllCourses = async () => {
@@ -51,15 +70,14 @@ export const AppContextProvider = (props) => {
         }
     }
 
-    //FETCH ALL COURSES 
+    //FETCH USER DATA   
     const fetchUserData = async () => {
         if (user?.publicMetadata.role === 'educator') {
             setIsEducator(true)
         }
         try {
             const res = await axiosInstance.get("/user/data")
-            console.log(res.data)
-            // setAllCourses(res?.data)
+            setUserData(res?.data?.user)
         } catch (error) {
             console.log('Error in fetchUserData ', error);
         }
@@ -74,6 +92,9 @@ export const AppContextProvider = (props) => {
             console.log("Error in fetching enrolled courses:", error)
         }
     }
+
+
+
 
     useEffect(() => {
         fetchAllCourses()
@@ -179,7 +200,7 @@ export const AppContextProvider = (props) => {
     };
 
     const value = {
-        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails, userData, setUserData
+        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails, userData, setUserData, enrollLoading, setEnrollLoading, setOrderDetails
     }
 
     return (
