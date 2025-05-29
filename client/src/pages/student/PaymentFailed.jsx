@@ -1,10 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import assets from '../../assets/assets'; // Update with your actual path
 import Footer from '../../components/student/Footer'; // Update with your actual footer component
+import { useContext } from 'react';
+import { AppContext } from '../../context/AppContext';
 
 const PaymentFailed = () => {
     const navigate = useNavigate();
-
+    const { orderDetails } = useContext(AppContext)
+    const url = orderDetails ? `/course/${orderDetails?.courseId}` : "/course-list"
     return (
         <>
             <div className="min-h-screen flex flex-col items-center justify-center md:px-36 px-8 py-20 text-center">
@@ -24,7 +27,7 @@ const PaymentFailed = () => {
                                 Go Back
                             </button>
                             <button
-                                onClick={() => navigate('/payment')} // Update with your payment route
+                                onClick={() => navigate(url)} // Update with your payment route
                                 className="flex-1 py-3 px-6 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
                             >
                                 Try Again

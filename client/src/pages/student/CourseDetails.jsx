@@ -28,7 +28,7 @@ const CourseDetails = () => {
     const navigate = useNavigate();
     const { user } = useUser();
 
-    const { allCourses, getRatingDetails, formatDuration, handlePlural, getPriceDetails, calculatePlaybackDetails, userData, setEnrollLoading, enrollLoading, setOrderDetails, orderDetails } = useContext(AppContext)
+    const { allCourses, getRatingDetails, formatDuration, handlePlural, getPriceDetails, calculatePlaybackDetails, userData, setEnrollLoading, enrollLoading, setOrderDetails, setPaymentDetails } = useContext(AppContext)
     const [openedContents, setOpenedContents] = useState([])
     const [courseData, setCourseData] = useState(null)
     const [isEnrolled, setIsEnrolled] = useState(false)
@@ -67,14 +67,29 @@ const CourseDetails = () => {
         })
     }
 
-    const verifyPayment = async (response) => {
+    const createOrder = async () => {
         try {
             setEnrollLoading(true)
+            const res = await axiosInstance.post("/payment/create-order", { id })
+            return { success: true, order: res.data?.order }
+        } catch (error) {
+            console.log('Error in createOrder function', error);
+            return { success: false, }
+        } finally {
+            setEnrollLoading(false)
+        }
+    }
+
+    const verifyPayment = async (response, orderDescription) => {
+
+        try {
+            setEnrollLoading(true)
+
             const res = await axiosInstance.post("/payment/verify-payment", {
                 response,
-                orderDetails
+                orderDescription
             });
-            console.log("Order placed :", res.data?.order);
+            console.log("Order placed :", res.data?.order); 
             toast.success(res.data?.message || "Payment successful", {
                 id: "verify-payment",
             });
@@ -91,27 +106,7 @@ const CourseDetails = () => {
             setEnrollLoading(false)
         }
     }
-    const createOrder = async () => {
-        try {
-            setEnrollLoading(true)
-            const res = await axiosInstance.post("/payment/create-order", { id })
-            console.log('oder :', res.data.order);
 
-            setOrderDetails({
-                orderId: res.data.order.id,
-                receiptId: res.data.order.receipt,
-                amountInPaise: res.data.order.amount,
-                status: "created",
-                courseId: res.data.order?.notes.courseId,
-            })
-            return { success: true, order: res.data?.order }
-        } catch (error) {
-            console.log('Error in createOrder function', error);
-            return { success: false, }
-        } finally {
-            setEnrollLoading(false)
-        }
-    }
     const handleEnrollClick = async () => {
         if (!userData) {
             toast.warn("Login to Enroll", { id: 1 })
@@ -126,9 +121,18 @@ const CourseDetails = () => {
     const handleCheckout = async () => {
         try {
             let res = await createOrder();
+
             if (res.success) {
                 const razorpay_key_id = import.meta.env.VITE_RAZORPAY_KEY_ID;
                 const key = razorpay_key_id;
+                const orderDescription = {
+                    orderId: res.order.id,
+                    receiptId: res.order.receipt,
+                    amountInPaise: res.order.amount,
+                    status: "created",
+                    courseId: res.order?.notes.courseId,
+                };
+
                 const paymentOptions = {
                     "key": key,
                     "amount": res.order.amount,
@@ -136,11 +140,11 @@ const CourseDetails = () => {
                     "name": "CodeCampus",
                     "order_id": res.order.id,
                     "handler": async (response) => {
-                        const res = await verifyPayment(response)
+
+                        const res = await verifyPayment(response, orderDescription)
                         if (res.success) {
                             navigate("/payment-success")
                         }
-                        console.log("handover to handleer function")
                     },
                     "prefill": {
                         "name": user.fullName,
@@ -352,7 +356,7 @@ const CourseDetails = () => {
                     </div>
                 </div>
             </div>
-            <Footer />``
+            <Footer />
         </>
     );
 }

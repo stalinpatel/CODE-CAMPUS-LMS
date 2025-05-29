@@ -29,10 +29,10 @@ const PaymentSuccess = () => {
                         </div>
 
                         <button
-                            onClick={() => navigate('/my-courses')} // Update with your courses route
+                            onClick={() => navigate('/my-enrollments')} // Update with your courses route
                             className="w-full max-w-md py-3 px-6 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors mb-4"
                         >
-                            Go to My Courses
+                            Go to My Enrollments
                         </button>
 
                         <div className="mt-8 pt-8 border-t border-gray-200 w-full">

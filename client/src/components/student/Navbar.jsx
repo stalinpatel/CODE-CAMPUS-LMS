@@ -42,7 +42,7 @@ const Navbar = () => {
                         user && <>
                             <button onClick={becomeEducator}>{isEducator ? "Educator Dashboard" : "Become Educator"}</button>
                             |
-                            <Link to={'/my-enrollments/3'}>My Enrollments</Link>
+                            <Link to={'/my-enrollments'}>My Enrollments</Link>
                         </>
                     }
                 </div>
@@ -58,7 +58,7 @@ const Navbar = () => {
                         user && <>
                             <button onClick={becomeEducator}>{isEducator ? "Educator Dashboard" : "Become Educator"}</button>
                             |
-                            <Link to={'/my-enrollments/3'}>My Enrollments</Link>
+                            <Link to={'/my-enrollments'}>My Enrollments</Link>
                         </>
                     }
                 </div>

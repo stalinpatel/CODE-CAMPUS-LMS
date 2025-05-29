@@ -4,10 +4,22 @@ import Purchase from "../models/Purchase.model.js";
 import crypto from "crypto";
 import User from "../models/User.model.js";
 const secret = process.env.RAZORPAY_KEY_SECRET;
-
+if (!secret) {
+  throw new Error(
+    "RAZORPAY_KEY_SECRET is not defined in environment variables."
+  );
+}
 const razorpayInstance = createRazorpayInstance();
 
-export const createOrderInDB = async (orderData, userId, courseId) => {
+const createOrderInDB = async (orderData) => {
+  try {
+    return await Purchase.create(orderData);
+  } catch (error) {
+    console.error("Error creating order in DB:", error);
+    throw new Error("Failed to create order in database.");
+  }
+};
+const saveEnrollments = async (userId, courseId) => {
   try {
     await User.findByIdAndUpdate(userId, {
       $addToSet: { enrolledCourses: courseId },
@@ -16,10 +28,10 @@ export const createOrderInDB = async (orderData, userId, courseId) => {
     await Course.findByIdAndUpdate(courseId, {
       $addToSet: { enrolledStudents: userId },
     });
-    return await Purchase.create(orderData);
+    return;
   } catch (error) {
-    console.error("Error creating order in DB:", error);
-    throw new Error("Failed to create order in database.");
+    console.error("Error saveEnrollments in DB:", error);
+    throw new Error("Failed to save Enrollments in database.");
   }
 };
 
@@ -100,15 +112,19 @@ export const createOrder = async (req, res) => {
 };
 
 export const verifyPayment = async (req, res) => {
-  console.log("inside verifyPayment");
-
   try {
-    const {
-      response: { razorpay_order_id, razorpay_payment_id, razorpay_signature },
-      orderDetails: { receiptId, amountInPaise, orderId, courseId },
-    } = req.body;
+    const { response, orderDescription } = req.body;
 
-    console.log("req.body", req.body);
+    if (!response || !orderDescription) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing response or order details" });
+    }
+
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      response;
+    const { receiptId, amountInPaise, courseId } = orderDescription;
+
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res
         .status(400)
@@ -126,20 +142,18 @@ export const verifyPayment = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid payment signature" });
     }
-    const order = await createOrderInDB(
-      {
-        courseId,
-        userId,
-        amount: Number((amountInPaise / 100).toFixed(2)),
-        status: "completed",
-        razorpayOrderId: razorpay_order_id,
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature,
-        receiptId: receiptId,
-      },
+    const order = await createOrderInDB({
+      courseId,
       userId,
-      courseId
-    );
+      amount: Number((amountInPaise / 100).toFixed(2)),
+      status: "completed",
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+      receiptId,
+    });
+
+    await saveEnrollments(userId, courseId);
 
     return res.status(200).json({
       order: {

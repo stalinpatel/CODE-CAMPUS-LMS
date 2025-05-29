@@ -1,128 +1,11 @@
-// import React, { useContext, useState } from 'react';
-// import { AppContext } from '../../context/AppContext';
-// import { Line } from "rc-progress"
-// import Footer from "../../components/student/Footer"
-// const MyEnrollments = () => {
-//   const { enrolledCourses, calculateTotalCourseDuration, navigate } = useContext(AppContext)
-//   const [progressArray, setProgressArray] = useState(
-//     [
-//       {
-//         lectureCompleted: 2,
-//         totalLectures: 4
-//       },
-//       {
-//         lectureCompleted: 5,
-//         totalLectures: 10
-//       },
-//       {
-//         lectureCompleted: 0,
-//         totalLectures: 3
-//       },
-//       {
-//         lectureCompleted: 7,
-//         totalLectures: 7
-//       },
-//       {
-//         lectureCompleted: 1,
-//         totalLectures: 5
-//       },
-//       {
-//         lectureCompleted: 9,
-//         totalLectures: 12
-//       },
-//       {
-//         lectureCompleted: 3,
-//         totalLectures: 8
-//       },
-//       {
-//         lectureCompleted: 6,
-//         totalLectures: 6
-//       },
-//       {
-//         lectureCompleted: 0,
-//         totalLectures: 6
-//       },
-//       {
-//         lectureCompleted: 4,
-//         totalLectures: 4
-//       },
-//       {
-//         lectureCompleted: 2,
-//         totalLectures: 7
-//       },
-//       {
-//         lectureCompleted: 8,
-//         totalLectures: 10
-//       }
-//     ])
-//   return (
-//     <>
-//       <div className='px-8 md:px-36 pt-10 '>
-//         <h1 className='text-2xl font-semibold'>My Enrollments</h1>
-//         <table className='md:table-auto table-fixed w-full overflow-hidden border  rounded-xl mt-10'>
-//           <thead>
-//             <tr>
-//               <th className='px-4 py-3 font-semibold truncate'>Couse</th>
-//               <th className='px-4 py-3 font-semibold truncate'>Duration</th>
-//               <th className='px-4 py-3 font-semibold truncate'>Completed</th>
-//               <th className='px-4 py-3 font-semibold truncate'>Status</th>
-//             </tr>
-//           </thead>
-//           <tbody className='text-gray-700 '>
-//             {
-//               enrolledCourses.map((course, index) => {
-//                 return (
-//                   <tr key={index} className='border-b border-gray-500/20'>
-//                     <td className='md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3'>
-//                       <img src={course.courseThumbnail} alt="thumbnail" className='w-14 sm:w-24 md:w-28' />
-//                       <div className='flex-1 '>
-//                         <p className='flex-1 max-sm:text-sm'>{course.courseTitle}</p>
-//                         <Line strokeWidth={2} percent={
-//                           progressArray[index]
-//                             ? (progressArray[index].lectureCompleted / progressArray[index].totalLectures) * 100
-//                             : 0
-//                         } className='bg-gray-300 rounded-full' />
-//                       </div>
-//                     </td>
-//                     <td className='px-4 py-3 max-sm:hidden'>
-//                       {calculateTotalCourseDuration(course)}
-//                     </td>
-//                     <td className='px-4 py-3 max-sm:hidden'>
-//                       {
-//                         progressArray[index] && `${progressArray[index].lectureCompleted}/${progressArray[index].totalLectures}`
-//                       } <span>Lectures</span>
-//                     </td>
-//                     <td className='px-4 py-3 text-center sm:text-left'>
-//                       <button
-//                         onClick={() => navigate("/player/" + course._id)}
-//                         className='w-24 sm:w-28 px-2 sm:px-5 py-1.5 sm:py-2 bg-blue-600 text-xs sm:text-sm text-white box-border rounded-lg hover:bg-blue-800 transition-all duration-200'
-//                       >
-//                         {progressArray[index] && progressArray[index].lectureCompleted === progressArray[index].totalLectures
-//                           ? "Completed"
-//                           : "On Going"}
-//                       </button>
-//                     </td>
-
-//                   </tr>
-//                 )
-//               })
-//             }
-//           </tbody>
-//         </table>
-//       </div>
-//       <Footer />
-//     </>
-//   );
-// };
-
-// export default MyEnrollments;   
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { Line } from "rc-progress";
 import Footer from "../../components/student/Footer";
+import Spinner from '../../components/student/Spinner';
 
 const MyEnrollments = () => {
-  const { enrolledCourses, calculateTotalCourseDuration, navigate } = useContext(AppContext);
+  const { enrolledCourses, calculateTotalCourseDuration, navigate, fetchingEnrolledCourses } = useContext(AppContext);
   const [progressArray, setProgressArray] = useState([
     { lectureCompleted: 2, totalLectures: 4 },
     { lectureCompleted: 5, totalLectures: 10 },
@@ -138,6 +21,18 @@ const MyEnrollments = () => {
     { lectureCompleted: 8, totalLectures: 10 }
   ]);
 
+  if (fetchingEnrolledCourses) {
+    return (<>
+      <div className='px-4 sm:px-8 md:px-36 pt-10 h-80'>
+        <h1 className='text-xl sm:text-2xl font-semibold mb-6'>My Enrollments</h1>
+
+        <div className='w-full mx-auto my-10 flex items-center justify-center '>
+          <Spinner classNames="scale-150" />
+        </div>
+      </div >
+      <Footer />
+    </>)
+  }
 
   return (
     <>
@@ -147,7 +42,7 @@ const MyEnrollments = () => {
         {/* Desktop Table */}
         <div className='hidden sm:block'>
           {
-            enrolledCourses && enrolledCourses.length === 0 &&
+            !fetchingEnrolledCourses && enrolledCourses && enrolledCourses.length === 0 &&
             (<h1 className='text-gray-700 text-xl text-center my-10 mx-auto '>No Course Enrolled</h1>)
           }
           <table className='w-full table-auto border rounded-xl overflow-hidden'>
@@ -208,6 +103,10 @@ const MyEnrollments = () => {
 
         {/* Mobile Cards */}
         <div className='sm:hidden space-y-6'>
+          {
+            !fetchingEnrolledCourses && enrolledCourses && enrolledCourses.length === 0 &&
+            (<h1 className='text-gray-700 text-xl text-center my-10 mx-auto '>No Course Enrolled</h1>)
+          }
           {enrolledCourses.map((course, index) => (
             <div key={index} className='border rounded-lg p-4 shadow-sm'>
               <div className='flex gap-4 mb-2'>

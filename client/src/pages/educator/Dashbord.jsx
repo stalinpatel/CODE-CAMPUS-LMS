@@ -13,7 +13,6 @@ const Dashbord = () => {
     const fetchDashbordData = async () => {
         try {
             const res = await axiosInstance.get("/educator/dashboard")
-            console.log('res:', res.data);
             setDashbordData(res?.data?.dashboardData)
         } catch (error) {
             console.log('Error Fetching Dashbord data :', error.message);
