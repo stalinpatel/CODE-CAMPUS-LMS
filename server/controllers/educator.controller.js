@@ -187,6 +187,10 @@ export const getEnrolledStudentsData = async (req, res) => {
   try {
     const educator = req.auth.userId;
     const courses = await Course.find({ educator });
+
+    if (!courses.length)
+      return res.status(200).json({ success: true, enrolledStudents: [] });
+
     const courseIds = courses.map((course) => course._id);
 
     const purchases = await Purchase.find({

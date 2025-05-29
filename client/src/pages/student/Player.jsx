@@ -6,7 +6,8 @@ import Spinner from '../../components/student/Spinner';
 import YouTube from "react-youtube"
 import Footer from '../../components/student/Footer';
 import Rating from "../../components/student/Rating"
-
+import axiosInstance from '../../utils/axios';
+import { toast } from "react-toastify"
 
 const Player = () => {
   const { courseId } = useParams();
@@ -15,6 +16,10 @@ const Player = () => {
   const [playerData, setPlayerData] = useState(null)
   const [openedContents, setOpenedContents] = useState([])
   const [isPlayerLoading, setIsPlayerLoading] = useState(true);
+  const [ratingOngoing, setRatingOngoing] = useState(false)
+  const [markCompletedLoader, setMarkCompletedLoader] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [currentPlayingLectureId, setCurrentPlayingLectureId] = useState(null)
 
   useEffect(() => {
     if (enrolledCourses && enrolledCourses.length > 0) {
@@ -31,7 +36,9 @@ const Player = () => {
         : [...prev, chapterId]
     );
   };
+
   const handleWatchClick = (lecture, chapterCount, lectureNo) => {
+    setCurrentPlayingLectureId(lecture.lectureId)
     setPlayerData({
       videoId: lecture.lectureUrl.split('/').pop(),
       lectureTitle: lecture.lectureTitle,
@@ -39,11 +46,57 @@ const Player = () => {
       lecture: lectureNo + 1,
     })
   }
+
+  const handleRatingClick = async (count) => {
+    try {
+      setRatingOngoing(true)
+      const res = await axiosInstance.post("/user/add-rating", { courseId, rating: count })
+      if (res?.data?.success) {
+        toast.success("Thanks for rating.")
+      } else {
+        toast.error(res.data?.message)
+      }
+    } catch (error) {
+      console.log('Error in Submiting Your Rating');
+      toast.error(error?.response?.data?.message || "Unable to rate")
+    } finally {
+      console.log("Rating done");
+      setRatingOngoing(false)
+    }
+  }
+
+  const markAsCompleted = async () => {
+    try {
+      setMarkCompletedLoader(true)
+      const res = await axiosInstance.post("/user/update-course-progress", { courseId, lectureId: currentPlayingLectureId })
+      console.log('res.data', res.data);
+
+      if (res?.data?.success) {
+        setIsCompleted(true)
+        toast.success("Marked as Completed.")
+      } else {
+        toast.error(res.data?.message || "Couldn't mark as completed")
+      }
+    } catch (error) {
+      console.log('Error in marking as completed');
+      toast.error(error?.response?.data?.message || "Unable to mark completed")
+    } finally {
+      console.log("Marked as completed ");
+      setMarkCompletedLoader(false)
+    }
+  }
+
   const playbackDetails = courseData ? calculatePlaybackDetails(courseData) : null;
 
 
   if (!courseData) {
-    return <Spinner />
+    return (<>
+      <div className='px-4 sm:px-8 md:px-36 pt-10 h-80'>
+        <div className='w-full mx-auto my-10 flex items-center justify-center '>
+          <Spinner classNames="scale-150" />
+        </div>
+      </div >
+    </>)
   }
   return (
     <>
@@ -98,7 +151,7 @@ const Player = () => {
             {/* Rating div */}
             <div className='flex items-center max-sm:flex-col gap-2 py-3 mt-10'>
               <h1 className='text-xl font-bold my-4'>Rate this course :</h1>
-              <Rating initialRating={0} />
+              <Rating initialRating={0} onRate={handleRatingClick} isProcessingRating={ratingOngoing} />
             </div>
           </div>
         </div>
@@ -137,10 +190,16 @@ const Player = () => {
                   Chapter {playerData.chapter} · Lecture {playerData.lecture} - {playerData.lectureTitle}
                 </p>
               )
+            }{
+              currentPlayingLectureId &&
+              <button
+                disabled={isCompleted}
+                onClick={markAsCompleted}
+                className="text-blue-600 font-semibold hover:underline transition duration-200">
+                {isCompleted ? "Completed" : "Mark as Completed"}
+              </button>
             }
-            <button className="text-blue-600 font-semibold hover:underline transition duration-200">
-              {false ? "Completed" : "Mark as Completed"}
-            </button>
+
           </div>
         </div>
       </div>

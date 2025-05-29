@@ -19,6 +19,7 @@ const createOrderInDB = async (orderData) => {
     throw new Error("Failed to create order in database.");
   }
 };
+
 const saveEnrollments = async (userId, courseId) => {
   try {
     await User.findByIdAndUpdate(userId, {

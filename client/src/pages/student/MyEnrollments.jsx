@@ -30,7 +30,6 @@ const MyEnrollments = () => {
           <Spinner classNames="scale-150" />
         </div>
       </div >
-      <Footer />
     </>)
   }
 

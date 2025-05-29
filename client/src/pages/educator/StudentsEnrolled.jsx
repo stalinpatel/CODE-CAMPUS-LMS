@@ -7,14 +7,14 @@ import axiosInstance from "../../utils/axios.js";
 
 
 const StudentsEnrolled = () => {
-    const [enrolledStudents, setEnrolledStudents] = useState(null)
+    const [enrolledStudents, setEnrolledStudents] = useState([])
     const [loading, setLoading] = useState(false);
 
     const fetchEnrolledStudents = async () => {
         try {
             setLoading(true)
             const res = await axiosInstance.get("/educator/enrolled-students")
-            setEnrolledStudents(res?.data)
+            setEnrolledStudents(res?.data.enrolledStudents)
         } catch (error) {
             console.log('Error Fetching enrolled students :', error.message);
         } finally {
@@ -31,7 +31,7 @@ const StudentsEnrolled = () => {
         const options = { day: 'numeric', month: 'short', year: 'numeric' };
         return new Date(dateString).toLocaleDateString('en-US', options);
     };
-    if (!loading && enrolledStudents.length === 0) {
+    if (!loading && enrolledStudents?.length === 0) {
         return (
             <>
                 <h1 className="text-center mx-auto text-gray-700 py-40">No Students Enrolled </h1>
@@ -69,7 +69,7 @@ const StudentsEnrolled = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {dummyStudentEnrolled.map((enrollment, index) => (
+                            {enrolledStudents.map((enrollment, index) => (
                                 <tr key={`${enrollment.student._id}-${index}`} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         {index + 1}
@@ -106,7 +106,7 @@ const StudentsEnrolled = () => {
 
                 {/* Mobile List View */}
                 <div className="sm:hidden">
-                    {dummyStudentEnrolled.map((enrollment, index) => (
+                    {enrolledStudents.map((enrollment, index) => (
                         <div key={`${enrollment.student._id}-${index}`} className="border-b p-4">
                             <div className="flex justify-between items-start">
                                 <span className="text-sm font-medium text-gray-500">#{index + 1}</span>

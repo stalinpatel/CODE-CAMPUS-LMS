@@ -18,6 +18,7 @@ export const getUserData = async (req, res) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+
 //USER ENROLLED COURSES WITH LECTURE LINKS
 export const userEnrolledCourses = async (req, res) => {
   try {
@@ -37,12 +38,15 @@ export const updateUserCourseProgress = async (req, res) => {
   try {
     const userId = req.auth.userId;
     const { courseId, lectureId } = req.body;
+    console.log("courseId", courseId);
+    console.log("lectureId", lectureId);
+
     const progressData = await CourseProgress.findOne({ userId, courseId });
 
     if (progressData) {
       if (progressData.lectureCompleted.includes(lectureId)) {
         return res
-          .status(400)
+          .status(200)
           .json({ success: true, message: "Lecture already completed" });
       }
       progressData.lectureCompleted.push(lectureId);
@@ -54,19 +58,18 @@ export const updateUserCourseProgress = async (req, res) => {
         lectureCompleted: [lectureId],
       });
     }
-    return res
-      .status(200)
-      .json({ success: false, message: "Progress Updated" });
+    return res.status(200).json({ success: true, message: "Progress Updated" });
   } catch (error) {
     console.error("error in updateUserCourseProgress controller", error);
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+
 //GET COURSE PROGRESS OF USER
 export const getUserCourseProgress = async (req, res) => {
   try {
     const userId = req.auth.userId;
-    const { courseId, lectureId } = req.body;
+    const { courseId } = req.body;
     const progressData = await CourseProgress.findOne({ userId, courseId });
 
     return res.status(200).json({ success: false, progressData });
@@ -97,7 +100,7 @@ export const addUserRating = async (req, res) => {
     }
     const user = await User.findById(userId);
 
-    if (!user || user.enrolledCourses.includes(courseId)) {
+    if (!user || !user.enrolledCourses.includes(courseId)) {
       return res.status(200).json({
         success: false,
         message: "User has not purchased this course",

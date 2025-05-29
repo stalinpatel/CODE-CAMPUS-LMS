@@ -13,6 +13,7 @@ const Dashbord = () => {
     const fetchDashbordData = async () => {
         try {
             const res = await axiosInstance.get("/educator/dashboard")
+
             setDashbordData(res?.data?.dashboardData)
         } catch (error) {
             console.log('Error Fetching Dashbord data :', error.message);
@@ -67,9 +68,9 @@ const Dashbord = () => {
                     {dashbordData.enrolledStudentsData?.map((enroll, idx) => (
                         <div key={idx} className="bg-gray-50 p-4 rounded-lg shadow-sm">
                             <div className="flex items-center space-x-3 mb-2">
-                                <img src={enroll.student.imageUrl} alt="avatar" className="w-10 h-10 rounded-full" />
+                                <img src={enroll.students.imageUrl} alt="avatar" className="w-10 h-10 rounded-full" />
                                 <div>
-                                    <p className="font-medium text-gray-800">{enroll.student.name}</p>
+                                    <p className="font-medium text-gray-800">{enroll.students.name}</p>
                                     <p className="text-sm text-gray-500">11/03/25</p>
                                 </div>
                             </div>
@@ -94,8 +95,8 @@ const Dashbord = () => {
                                 <tr key={idx} className="hover:bg-gray-50">
                                     <td className="p-2 text-sm text-gray-700">{idx + 1}</td>
                                     <td className="p-2 flex items-center space-x-2">
-                                        <img src={enroll.student.imageUrl} alt="avatar" className="w-8 h-8 rounded-full" />
-                                        <span className="text-sm text-gray-800">{enroll.student.name}</span>
+                                        <img src={enroll.students.imageUrl} alt="avatar" className="w-8 h-8 rounded-full" />
+                                        <span className="text-sm text-gray-800">{enroll.students.name}</span>
                                     </td>
                                     <td className="p-2 text-sm text-gray-800">{enroll.courseTitle}</td>
                                     <td className="p-2 text-sm text-gray-600">22/03/25</td>

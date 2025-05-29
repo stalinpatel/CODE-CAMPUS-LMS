@@ -34,7 +34,7 @@ app.use(clerkMiddleware());
 app.use("/api/educator", educatorRouter); //DONE
 app.use("/api/course", courseRouter); //DONE
 app.use("/api/user", userRouter);
-app.use("/api/payment", paymentRouter);
+app.use("/api/payment", paymentRouter); //DONE
 
 //DEFAULT ROUTE
 app.get("/", (req, res) => res.send("API working"));
