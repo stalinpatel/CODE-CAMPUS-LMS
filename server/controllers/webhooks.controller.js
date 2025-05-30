@@ -1,8 +1,11 @@
 import { Webhook } from "svix";
 import User from "../models/User.model.js";
 
-// API CONTROLLER FUNCTION TO MANAGE CLERK USER WITH DATABASE
+if (!process.env.CLERK_WEBHOOK_SECRET) {
+  console.log("CLERK WEBHOOK SECRET NOT LOADED PROPERLY");
+}
 
+// API CONTROLLER FUNCTION TO MANAGE CLERK USER WITH DATABASE
 export const clerkWebhooks = async (req, res) => {
   try {
     // ✅ CREATE SVIX WEBHOOK INSTANCE USING SECRET

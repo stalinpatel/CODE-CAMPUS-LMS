@@ -331,7 +331,7 @@ const AddCourse = () => {
                                                     {lectureIndex + 1}. {lecture.lectureTitle}
                                                 </span>
                                                 <span className='text-xs text-gray-500'>
-                                                    {lecture.lectureDuration} min
+                                                    {lecture.lectureDuration} sec
                                                 </span>
                                                 <a
                                                     href={lecture.lectureUrl}
@@ -422,7 +422,7 @@ const AddCourse = () => {
 
                             <div>
                                 <label htmlFor='lectureDuration' className='block text-sm font-medium text-gray-700 mb-1'>
-                                    Duration (minutes)
+                                    Duration (seconds)
                                 </label>
                                 <input
                                     id='lectureDuration'

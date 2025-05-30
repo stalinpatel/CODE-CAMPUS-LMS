@@ -5,12 +5,27 @@ import Purchase from "../models/Purchase.model.js";
 import cloudinary from "../configs/cloudinary.config.js";
 import fs from "fs/promises";
 
-const uploadImageHelper = async (local_path) => {
+const uploadImageHelper = async (file) => {
   try {
-    const imageUpload = await cloudinary.uploader.upload(local_path);
-    // After successful upload
-    await fs.unlink(local_path);
-    return imageUpload.secure_url;
+    // Handle both memoryStorage (buffer) and diskStorage (path)
+    if (file.buffer) {
+      const streamUpload = () => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream((error, result) => {
+            if (result) resolve(result);
+            else reject(error);
+          });
+          streamifier.createReadStream(file.buffer).pipe(stream);
+        });
+      };
+      const imageUpload = await streamUpload();
+      return imageUpload.secure_url;
+    } else if (file.path) {
+      const imageUpload = await cloudinary.uploader.upload(file.path);
+      return imageUpload.secure_url;
+    } else {
+      throw new Error("Unsupported file format.");
+    }
   } catch (error) {
     console.log("❌ Image upload failed:", error);
     throw new Error("Image upload to Cloudinary failed.");
@@ -75,7 +90,7 @@ export const addCourse = async (req, res) => {
       });
     }
 
-    const image_url = await uploadImageHelper(courseThumbnail.path);
+    const image_url = await uploadImageHelper(courseThumbnail);
 
     const newCourse = await Course.create({
       courseTitle,

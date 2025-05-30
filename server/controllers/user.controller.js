@@ -1,3 +1,4 @@
+import { useId } from "react";
 import Course from "../models/Course.model.js";
 import CourseProgress from "../models/CourseProgress.model.js";
 import User from "../models/User.model.js";
@@ -23,10 +24,20 @@ export const getUserData = async (req, res) => {
 export const userEnrolledCourses = async (req, res) => {
   try {
     const userId = req.auth.userId;
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "UserId not provided" });
+    }
     const userData = await User.findById(userId).populate("enrolledCourses");
+    if (!userData) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+    }
     return res
       .status(200)
-      .json({ success: true, enrolledCourses: userData.enrolledCourses });
+      .json({ success: true, enrolledCourses: userData?.enrolledCourses });
   } catch (error) {
     console.error("error in userEnrolledCourses controller", error);
     return res.status(400).json({ success: false, message: error.message });
