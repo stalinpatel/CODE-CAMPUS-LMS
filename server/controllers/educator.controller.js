@@ -4,16 +4,28 @@ import User from "../models/User.model.js";
 import Purchase from "../models/Purchase.model.js";
 import cloudinary from "../configs/cloudinary.config.js";
 import fs from "fs/promises";
+import streamifier from "streamifier";
 
 const uploadImageHelper = async (file) => {
   try {
-    // Handle both memoryStorage (buffer) and diskStorage (path)
+    console.log(
+      `Uploading image, file type: ${
+        file.buffer ? "memoryBuffer" : file.path ? "diskPath" : "unknown"
+      }`
+    );
+
     if (file.buffer) {
       const streamUpload = () => {
         return new Promise((resolve, reject) => {
+          console.log("Starting stream upload...");
           const stream = cloudinary.uploader.upload_stream((error, result) => {
-            if (result) resolve(result);
-            else reject(error);
+            if (result) {
+              console.log("Stream upload successful.");
+              resolve(result);
+            } else {
+              console.log("Stream upload error:", error);
+              reject(error);
+            }
           });
           streamifier.createReadStream(file.buffer).pipe(stream);
         });
@@ -21,7 +33,9 @@ const uploadImageHelper = async (file) => {
       const imageUpload = await streamUpload();
       return imageUpload.secure_url;
     } else if (file.path) {
+      console.log("Uploading from disk path...");
       const imageUpload = await cloudinary.uploader.upload(file.path);
+      console.log("Disk upload successful.");
       return imageUpload.secure_url;
     } else {
       throw new Error("Unsupported file format.");
