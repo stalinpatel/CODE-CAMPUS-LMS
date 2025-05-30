@@ -42,5 +42,3 @@ app.get("/", (req, res) => res.send("API working"));
 app.listen(PORT, () => {
   console.log(`Server is running on port: http://localhost:${PORT}`);
 });
-
-// start from Internal Server ErrorTypeError: Cannot read properties of undefined (reading 'receiptId')

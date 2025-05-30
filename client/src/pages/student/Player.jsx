@@ -8,6 +8,7 @@ import Footer from '../../components/student/Footer';
 import Rating from "../../components/student/Rating"
 import axiosInstance from '../../utils/axios';
 import { toast } from "react-toastify"
+import ConfirmModal from '../../components/student/ConfirmModal';
 
 const Player = () => {
   const { courseId } = useParams();
@@ -22,6 +23,8 @@ const Player = () => {
   const [currentPlayingLectureId, setCurrentPlayingLectureId] = useState(null)
   const [courseProgressData, setCourseProgressData] = useState(null)
   const [initialRating, setInitialRating] = useState(0)
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
 
   useEffect(() => {
     if (enrolledCourses && enrolledCourses.length > 0) {
@@ -45,6 +48,7 @@ const Player = () => {
 
   const handleWatchClick = (lecture, chapterCount, lectureNo) => {
     setCurrentPlayingLectureId(lecture.lectureId)
+    setIsCompleted((courseProgressData?.lectureCompleted || []).includes(lecture.lectureId));
     setPlayerData({
       videoId: lecture.lectureUrl.split('/').pop(),
       lectureTitle: lecture.lectureTitle,
@@ -81,28 +85,71 @@ const Player = () => {
   }
 
   const markAsCompleted = async () => {
+    const isAlreadyCompleted = (courseProgressData?.lectureCompleted || []).includes(currentPlayingLectureId);
+
+    if (isAlreadyCompleted) {
+      setShowConfirmModal(true); // 🧠 Show modal instead of double marking
+      return;
+    }
     try {
-      setMarkCompletedLoader(true)
-      // Optimistic update
+      setMarkCompletedLoader(true);
+      // Optimistic UI update
       setCourseProgressData((prev) => ({
         ...prev,
         lectureCompleted: [...(prev?.lectureCompleted || []), currentPlayingLectureId]
       }));
       setIsCompleted(true);
-      const res = await axiosInstance.post("/user/update-course-progress", { courseId, lectureId: currentPlayingLectureId })
+
+      const res = await axiosInstance.post("/user/mark-course-progress", {
+        courseId,
+        lectureId: currentPlayingLectureId
+      });
+
       if (res?.data?.success) {
-        toast.success("Marked as Completed.")
+        toast.success("Marked as Completed.");
       } else {
-        toast.error(res.data?.message || "Couldn't mark as completed")
+        toast.error(res.data?.message || "Couldn't mark as completed");
       }
     } catch (error) {
       console.log('Error in marking as completed');
-      toast.error(error?.response?.data?.message || "Unable to mark completed")
+      toast.error(error?.response?.data?.message || "Unable to mark completed");
     } finally {
-      console.log("Marked as completed ");
-      setMarkCompletedLoader(false)
+      setMarkCompletedLoader(false);
     }
-  }
+  };
+
+  const handleUnmarkCompleted = async () => {
+    setShowConfirmModal(false);
+    try {
+      setMarkCompletedLoader(true);
+
+      // Optimistically update progress data
+      const updatedList = (courseProgressData?.lectureCompleted || []).filter(id => id !== currentPlayingLectureId);
+
+      setCourseProgressData((prev) => ({
+        ...prev,
+        lectureCompleted: updatedList
+      }));
+      setIsCompleted(false);
+
+      const res = await axiosInstance.post("/user/unmark-course-progress", {
+        courseId,
+        lectureId: currentPlayingLectureId
+      });
+
+      if (res?.data?.success) {
+        toast.success("Marked as not completed.");
+      } else {
+        toast.error(res.data?.message || "Couldn't unmark as completed");
+      }
+    } catch (error) {
+      console.log('Error in unmarking as completed');
+      toast.error(error?.response?.data?.message || "Unable to unmark completed");
+    } finally {
+      setMarkCompletedLoader(false);
+    }
+  };
+
 
   const fetchInitialRating = (ratingsArray) => {
     let userRating;
@@ -118,6 +165,16 @@ const Player = () => {
       return;
     }
   }
+
+  const handleIconClick = (e, lectureId) => {
+    e.stopPropagation(); // Prevent bubbling to the watch click
+    const isAlreadyCompleted = (courseProgressData?.lectureCompleted || []).includes(lectureId);
+
+    if (isAlreadyCompleted) {
+      setCurrentPlayingLectureId(lectureId); // ⚠️ Set current for accurate unmarking
+      setShowConfirmModal(true);
+    }
+  };
 
   const playbackDetails = courseData ? calculatePlaybackDetails(courseData) : null;
 
@@ -162,7 +219,13 @@ const Player = () => {
                           chapter.chapterContent.map((lecture, lectureNo) => {
                             return (
                               <li key={`${lecture?.lectureId}-${lectureNo}`} className="flex items-start gap-2 py-1">
-                                <img src={(courseProgressData?.lectureCompleted || []).includes(lecture?.lectureId) ? assets.blueTickIcon : assets.playIcon} alt="bullet icon" className="w-4 h-4 mt-1" />
+                                <img
+                                  src={(courseProgressData?.lectureCompleted || []).includes(lecture?.lectureId) ? assets.blueTickIcon : assets.playIcon}
+                                  alt="bullet icon"
+                                  className="w-4 h-4 mt-1 cursor-pointer"
+                                  onClick={(e) => handleIconClick(e, lecture?.lectureId)}
+                                />
+
 
                                 <div className="flex items-center justify-between w-full text-gray-800 text-xs md:text-default">
                                   <p>{lecture.lectureTitle}</p>
@@ -229,7 +292,6 @@ const Player = () => {
             }{
               currentPlayingLectureId &&
               <button
-                disabled={isCompleted}
                 onClick={markAsCompleted}
                 className="text-blue-600 font-semibold flex items-center justify-center hover:underline transition duration-200">
                 {markCompletedLoader ? <Spinner /> : isCompleted || (courseProgressData?.lectureCompleted || []).includes(currentPlayingLectureId)
@@ -240,6 +302,13 @@ const Player = () => {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleUnmarkCompleted}
+        title="Mark as Not Completed?"
+        message="Are you sure you want to unmark this lecture as completed? This will update your course progress."
+      />
       <Footer />
     </>
   );

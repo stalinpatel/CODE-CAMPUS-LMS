@@ -34,7 +34,7 @@ export const userEnrolledCourses = async (req, res) => {
 };
 
 //UPDATE USERCOURSE PROGRESS
-export const updateUserCourseProgress = async (req, res) => {
+export const markUserCourseProgress = async (req, res) => {
   try {
     const userId = req.auth.userId;
     const { courseId, lectureId } = req.body;
@@ -64,6 +64,49 @@ export const updateUserCourseProgress = async (req, res) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+export const unmarkUserCourseProgress = async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+    const { courseId, lectureId } = req.body;
+
+    // Validation check
+    if (!courseId || !lectureId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing courseId or lectureId" });
+    }
+
+    // Find the progress document
+    const progressData = await CourseProgress.findOne({ userId, courseId });
+
+    if (!progressData) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Progress data not found" });
+    }
+
+    // Check if lecture is already marked as completed
+    const index = progressData.lectureCompleted.indexOf(lectureId);
+    if (index === -1) {
+      return res.status(400).json({
+        success: false,
+        message: "Lecture is not marked as completed",
+      });
+    }
+
+    // Remove lecture from completed list
+    progressData.lectureCompleted.splice(index, 1);
+    await progressData.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "Lecture unmarked as completed" });
+  } catch (error) {
+    console.error("error in unmarkUserCourseProgress controller", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error: " + error.message });
+  }
+};
 
 //GET COURSE PROGRESS OF USER
 export const getUserCourseProgress = async (req, res) => {
@@ -72,7 +115,7 @@ export const getUserCourseProgress = async (req, res) => {
     const { courseId } = req.body;
     const progressData = await CourseProgress.findOne({ userId, courseId });
 
-    return res.status(200).json({ success: false, progressData });
+    return res.status(200).json({ success: true, progressData });
   } catch (error) {
     console.error("error in getUserCourseProgress controller", error);
     return res.status(400).json({ success: false, message: error.message });
