@@ -1,7 +1,8 @@
 import { createContext, useEffect, useState } from "react";
-import { useFetcher, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth, useUser } from "@clerk/clerk-react"
 import axiosInstance from "../utils/axios.js";
+import CentralLoader from "../components/student/CentralLoader.jsx";
 
 export const AppContext = createContext()
 
@@ -9,7 +10,9 @@ export const AppContextProvider = (props) => {
     const currency = import.meta.env.VITE_CURRENCY;
     const navigate = useNavigate();
     const { getToken } = useAuth();
-    const { user } = useUser();
+    const { user, isLoaded: isUserLoaded } = useUser(); // Get isLoaded from useUser
+
+    const [isLoading, setIsLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         const setupInterceptor = () => {
@@ -57,10 +60,6 @@ export const AppContextProvider = (props) => {
         courseId: ""
     })
 
-    // useEffect(() => {
-    //     console.log('orderdetails', orderDetails);
-    // }, [orderDetails])
-
     // FETCH ALL COURSES
     const fetchAllCourses = async () => {
         try {
@@ -84,6 +83,8 @@ export const AppContextProvider = (props) => {
             setUserData(res?.data?.user)
         } catch (error) {
             console.log('Error in fetchUserData ', error);
+        } finally {
+            setIsLoading(false); // Set loading to false when done
         }
     }
 
@@ -97,22 +98,25 @@ export const AppContextProvider = (props) => {
             console.log("Error in fetching enrolled courses:", error)
         } finally {
             setFetchingEnrolledCourses(false)
+            setIsLoading(false)
         }
     }
-
-
-
 
     useEffect(() => {
         fetchAllCourses()
     }, [])
 
     useEffect(() => {
-        if (user) {
-            fetchUserData()
-            fetchEnrolledCourses();
+        if (isUserLoaded) { // Only proceed if Clerk has loaded the user
+            if (user) {
+                fetchUserData()
+                fetchEnrolledCourses();
+            } else {
+                setIsLoading(false); // If no user, set loading to false
+            }
         }
-    }, [user, paymentDetails, orderDetails])
+    }, [user, isUserLoaded, paymentDetails, orderDetails]) // Add isUserLoaded to dependencies
+
 
     const getStars = (count) =>
         Array.from({ length: 5 }, (_, i) => (
@@ -152,7 +156,7 @@ export const AppContextProvider = (props) => {
         return {
             originalPrice: currency + (courseData.coursePrice).toFixed(2),
             discountInPercentage: courseData.discount.toFixed(2),
-            discountPrice: currency + courseData.coursePrice * courseData.discount.toFixed(2),
+            discountPrice: currency + (courseData.coursePrice * (courseData.discount / 100)).toFixed(2),
             discountedPrice: currency + (courseData.coursePrice - courseData.discount * courseData.coursePrice / 100).toFixed(2)
         }
     }
@@ -207,12 +211,19 @@ export const AppContextProvider = (props) => {
     };
 
     const value = {
-        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails, userData, setUserData, enrollLoading, setEnrollLoading, setPaymentDetails, setOrderDetails, fetchingEnrolledCourses, fetchingAllCourses
+        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails, userData, setUserData, enrollLoading, setEnrollLoading, setPaymentDetails, setOrderDetails, fetchingEnrolledCourses, fetchingAllCourses, isLoading
     }
 
     return (
-        <AppContext.Provider value={value}>
-            {props.children}
-        </AppContext.Provider>
+        <>
+            {(!isUserLoaded || isLoading) ? (
+                <CentralLoader />
+
+            ) : (
+                <AppContext.Provider value={value}>
+                    {props.children}
+                </AppContext.Provider>
+            )}
+        </>
     )
 }
