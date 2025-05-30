@@ -1,90 +1,85 @@
-import { Webhook } from "svix";
-import User from "../models/User.model.js";
-
-if (!process.env.CLERK_WEBHOOK_SECRET) {
-  console.log("CLERK WEBHOOK SECRET NOT LOADED PROPERLY");
-}
-
-// API CONTROLLER FUNCTION TO MANAGE CLERK USER WITH DATABASE
 export const clerkWebhooks = async (req, res) => {
   try {
-    // ✅ CREATE SVIX WEBHOOK INSTANCE USING SECRET
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-
-    // ✅ GET RAW PAYLOAD AS BUFFER (FROM express.raw())
     const payload = req.body;
 
-    // ✅ CONVERT BUFFER TO STRING FOR VERIFICATION
     const bodyStr = Buffer.isBuffer(payload)
       ? payload.toString()
-      : JSON.stringify(payload); // fallback when using Postman or dev testing
+      : JSON.stringify(payload);
 
-    // ✅ EXTRACT SVIX SIGNATURE HEADERS
     const headers = {
       "svix-id": req.headers["svix-id"],
       "svix-signature": req.headers["svix-signature"],
       "svix-timestamp": req.headers["svix-timestamp"],
     };
 
-    // ✅ VERIFY WEBHOOK SIGNATURE USING SVIX
+    // ✅ Signature verification first — never trust without this
     await whook.verify(bodyStr, headers);
 
-    // ✅ PARSE JSON BODY AFTER VERIFICATION (NEVER BEFORE)
     const parsedBody = JSON.parse(bodyStr);
     const { data, type } = parsedBody;
 
-    // ✅ HANDLE EVENTS BASED ON TYPE
     switch (type) {
       case "user.created": {
-        console.log("user.created event received :", data);
-        // ✅ STRUCTURE USER DATA FROM CLERK
+        console.log("user.created event received:", data);
+
         const userData = {
           _id: data.id,
           name: `${data.first_name} ${data.last_name}`,
-          email: data.email_addresses[0].email_address,
+          email: data.email_addresses?.[0]?.email_address ?? null,
           imageUrl: data.image_url,
         };
 
-        // ✅ INSERT USER INTO DB
-        await User.create(userData);
+        const existingUser = await User.findById(data.id);
 
-        // ✅ SEND 200 RESPONSE TO CLERK (MUST)
+        if (!existingUser) {
+          await User.create(userData);
+        } else {
+          console.log("🟡 User already exists — skipping creation");
+        }
+
         return res.status(200).json({ success: true });
       }
 
       case "user.updated": {
-        console.log("user.updated event received :", data);
+        console.log("user.updated event received:", data);
 
         const userData = {
           name: `${data.first_name} ${data.last_name}`,
-          email: data.email_addresses[0].email_address,
+          email: data.email_addresses?.[0]?.email_address ?? null,
           imageUrl: data.image_url,
         };
 
-        // ✅ UPDATE USER IN DB
-        await User.findByIdAndUpdate(data.id, userData);
+        const existingUser = await User.findById(data.id);
 
-        // ✅ ACKNOWLEDGE TO CLERK
+        if (existingUser) {
+          await User.findByIdAndUpdate(data.id, userData, { new: true });
+        } else {
+          console.log("🔴 Tried to update non-existent user — skipping");
+        }
+
         return res.status(200).json({ success: true });
       }
 
       case "user.deleted": {
-        console.log("user.created deleted received :", data);
+        console.log("user.deleted event received:", data);
 
-        // ✅ DELETE USER FROM DB
-        await User.findByIdAndDelete(data.id);
+        const existingUser = await User.findById(data.id);
 
-        // ✅ ACKNOWLEDGE TO CLERK
+        if (existingUser) {
+          await User.findByIdAndDelete(data.id);
+        } else {
+          console.log("⚠️ Tried to delete non-existent user — skipping");
+        }
+
         return res.status(200).json({ success: true });
       }
 
       default:
-        // ⚠️ HANDLE UNREGISTERED EVENTS (OPTIONAL)
-        console.log(`UNHANDLED EVENT TYPE: ${type}`);
+        console.log(`⚠️ Unhandled event type: ${type}`);
         return res.status(200).json({ success: true });
     }
   } catch (error) {
-    // ❌ CATCH ALL ERRORS: SIGNATURE FAIL, DB FAIL, ETC.
     console.error("❌ CLERK WEBHOOK ERROR:", {
       message: error.message,
       stack: error.stack,
@@ -92,7 +87,6 @@ export const clerkWebhooks = async (req, res) => {
       body: req.body?.toString?.() ?? req.body,
     });
 
-    // ❌ RETURN 400 SO CLERK CAN RETRY IF NEEDED
     return res.status(400).json({
       success: false,
       message: "WEBHOOK FAILED",
