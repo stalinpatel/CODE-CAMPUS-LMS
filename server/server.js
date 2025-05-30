@@ -13,6 +13,11 @@ import paymentRouter from "./routes/payment.route.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const CLIENT_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5173"
+    : process.env.CLIENT_URL;
+
 // CONNECT TO DATABASE
 await connectDB();
 await connectCloudinary();
@@ -20,10 +25,11 @@ await connectCloudinary();
 //WEBHOOK NEEDS UN-PARSED RAW REQ BODY , KEEP IT IN TOP
 app.post("/clerk", express.raw({ type: "*/*" }), clerkWebhooks); //put it before the express.json()
 
+console.log("CORS CLIENT_URL:", CLIENT_URL);
 //MIDDLEWARES
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: CLIENT_URL,
     credentials: true,
   })
 );
