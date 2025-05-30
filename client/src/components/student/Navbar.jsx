@@ -5,6 +5,7 @@ import { useClerk, UserButton, useUser } from '@clerk/clerk-react';
 import { AppContext } from '../../context/AppContext.jsx';
 import axiosInstance from '../../utils/axios.js';
 import { toast } from 'react-toastify';
+import codeCampusLogo from "../../assets/assets.js"
 
 const Navbar = () => {
     const isCourseListPage = location.pathname.includes('/course-list')
@@ -33,7 +34,8 @@ const Navbar = () => {
     return (
         <div className={`flex items-center justify-between px-4 sm:px-10 md:px-14 lg:px-36 border-b border-gray-500 py-4 ${isCourseListPage ? "bg-white" : "bg-cyan-100/70"}`}>
             <button onClick={() => navigate("/")}>
-                <img src={assets.logo} alt="Logo" className='w-28 lg:w-32 cursor-pointer' />
+                {/* <img src={assets.logo} alt="Logo" className='w-28 lg:w-32 cursor-pointer' /> */}
+                <img src={assets.codeCampusLogo} alt="Logo" className='w-32 lg:w-40 cursor-pointer ' />
             </button>
             {/* Desktop view */}
             <div className='hidden md:flex items-center gap-5 text-gray-500 '>

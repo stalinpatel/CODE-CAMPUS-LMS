@@ -45,8 +45,11 @@ import userIcon2Img from "./user_icon_2.svg";
 import walmartLogoImg from "./walmart_logo.svg";
 import paymentSuccessIcon from "./success.png";
 import paymentFailedIcon from "./failed.png";
+import codeCampusLogo from "./codeCampusLogo.png";
+import codeCampusLogoDarkTheme from "./codeCampusLogoDarkTheme.png";
 
 const assets = {
+  codeCampusLogo,
   accentureLogo: accentureLogoImg,
   adobeLogo: adobeLogoImg,
   microsoftLogo: microsoftLogoImg,
@@ -70,7 +73,7 @@ const assets = {
   instagramIcon: instagramIconImg,
   lessonIcon: lessonIconImg,
   logo: logoImg,
-  logoDark: logoDarkImg,
+  logoDark: codeCampusLogoDarkTheme,
   myCourseIcon: myCourseIconImg,
   patientsIcon: patientsIconImg,
   paypalLogo: paypalLogoImg,
@@ -191,6 +194,7 @@ export const dummyStudentEnrolled = [
     purchaseDate: "2024-12-20T11:04:48.798Z",
   },
 ];
+
 export const dummyEducatorData = {
   _id: "675ac1512100b91a6d9b8b24",
   name: "GreatStack",
@@ -201,58 +205,7 @@ export const dummyEducatorData = {
   updatedAt: "2024-12-12T10:56:17.930Z",
   __v: 0,
 };
-// export const courses = [
-//   {
-//     _id: 4,
-//     image: course1Img,
-//     title: "Cloud Computing Essentials",
-//     instructor: "GreatStack",
-//     rating: 3,
-//     reviews: 5,
-//     price: 55.99,
-//     discount: 10,
-//   },
-//   {
-//     _id: 3,
-//     image: course2Img,
-//     title: "AI Chatbot Development",
-//     instructor: "CodeCraft",
-//     rating: 4,
-//     reviews: 12,
-//     price: 69.99,
-//     discount: 40,
-//   },
-//   {
-//     _id: 2,
-//     image: course3Img,
-//     title: "MERN Stack Mastery",
-//     instructor: "DevTrail",
-//     rating: 5,
-//     reviews: 48,
-//     price: 89.0,
-//     discount: 30,
-//   },
-//   {
-//     _id: 1,
-//     image: course4Img,
-//     title: "Designing with React & Tailwind",
-//     instructor: "UI Fusion",
-//     rating: 4,
-//     reviews: 22,
-//     price: 49.99,
-//     discount: 20,
-//   },
-// ];
-/**
- * courseTitle
- * coursePrice
- * discount
- * courseThumbnail
- * courseDescription
- * courseContent
- *
- *
- */
+
 export const courses = [
   {
     _id: "605c72efb3f1c2b1f8e4e1a1",
@@ -898,6 +851,7 @@ export const courses = [
     courseThumbnail: "https://img.youtube.com/vi/WbV3zRgpw_E/maxresdefault.jpg",
   },
 ];
+
 export const dummyTestimonial = [
   {
     name: "Donald Jackman",

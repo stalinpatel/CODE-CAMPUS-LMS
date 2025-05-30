@@ -1,25 +1,62 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { Line } from "rc-progress";
 import Footer from "../../components/student/Footer";
 import Spinner from '../../components/student/Spinner';
+import axiosInstance from '../../utils/axios';
 
 const MyEnrollments = () => {
   const { enrolledCourses, calculateTotalCourseDuration, navigate, fetchingEnrolledCourses } = useContext(AppContext);
-  const [progressArray, setProgressArray] = useState([
-    { lectureCompleted: 2, totalLectures: 4 },
-    { lectureCompleted: 5, totalLectures: 10 },
-    { lectureCompleted: 0, totalLectures: 3 },
-    { lectureCompleted: 7, totalLectures: 7 },
-    { lectureCompleted: 1, totalLectures: 5 },
-    { lectureCompleted: 9, totalLectures: 12 },
-    { lectureCompleted: 3, totalLectures: 8 },
-    { lectureCompleted: 6, totalLectures: 6 },
-    { lectureCompleted: 0, totalLectures: 6 },
-    { lectureCompleted: 4, totalLectures: 4 },
-    { lectureCompleted: 2, totalLectures: 7 },
-    { lectureCompleted: 8, totalLectures: 10 }
-  ]);
+  const [progressArray, setProgressArray] = useState([]);
+  const calculateTotalLecturesCount = (course) => {
+    // console.log('courseContent:', course);
+    let lectureCount = 0;
+    course?.courseContent.map((chapter) => {
+      lectureCount += chapter?.chapterContent?.length;
+    })
+    return { _id: course._id, lectureCount };
+  }
+  const fetchCompletedLecturesCount = async () => {
+    try {
+      const results = await Promise.all(
+        enrolledCourses.map(async (course) => {
+          const res = await axiosInstance.post("/user/get-course-progress", { courseId: course._id });
+          return res.data?.progressData;
+        })
+      );
+      return results;
+    } catch (err) {
+      console.error("Failed to fetch course progress", err);
+      return []; // fallback to empty array
+    }
+  };
+
+
+  useEffect(() => {
+    const fetchProgressData = async () => {
+      if (enrolledCourses && enrolledCourses.length > 0) {
+        // 1. Get total lectures from each course
+        const totalLecturesCountArray = enrolledCourses.map(course => {
+          return calculateTotalLecturesCount(course);
+        });
+
+        // 2. Await completed lecture data from backend
+        const completedProgressArray = await fetchCompletedLecturesCount();
+
+        // 3. Map progress data into format expected by progressArray
+        const updatedProgressArray = totalLecturesCountArray.map((course, index) => ({
+          lectureCompleted: completedProgressArray[index]?.lectureCompleted?.length || 0,
+          totalLectures: course.lectureCount,
+        }));
+
+        setProgressArray(updatedProgressArray);
+      }
+    };
+
+    fetchProgressData(); // invoke async function
+  }, [enrolledCourses]);
+
+
 
   if (fetchingEnrolledCourses) {
     return (<>
