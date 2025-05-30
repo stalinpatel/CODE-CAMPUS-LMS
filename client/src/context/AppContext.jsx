@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { courses } from "../assets/assets";
 import { useFetcher, useNavigate } from "react-router-dom";
 import { useAuth, useUser } from "@clerk/clerk-react"
 import axiosInstance from "../utils/axios.js";
@@ -42,6 +41,7 @@ export const AppContextProvider = (props) => {
     const [enrolledCourses, setEnrolledCourses] = useState([])
     const [enrollLoading, setEnrollLoading] = useState(false)
     const [fetchingEnrolledCourses, setFetchingEnrolledCourses] = useState(false)
+    const [fetchingAllCourses, setFetchingAllCourses] = useState(false)
     const [paymentDetails, setPaymentDetails] = useState({
         orderId: "",
         receiptId: "",
@@ -64,10 +64,13 @@ export const AppContextProvider = (props) => {
     // FETCH ALL COURSES
     const fetchAllCourses = async () => {
         try {
+            setFetchingAllCourses(true)
             const res = await axiosInstance.get("/course/all")
             setAllCourses(res?.data?.courses)
         } catch (error) {
             console.log('Error in fetchAllCourses ', error);
+        } finally {
+            setFetchingAllCourses(false)
         }
     }
 
@@ -204,7 +207,7 @@ export const AppContextProvider = (props) => {
     };
 
     const value = {
-        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails, userData, setUserData, enrollLoading, setEnrollLoading, setPaymentDetails, setOrderDetails, fetchingEnrolledCourses
+        currency, allCourses, navigate, isEducator, formatDuration, setIsEducator, getRatingDetails, getStars, getRating, handlePlural, getPriceDetails, enrolledCourses, calculateTotalCourseDuration, calculatePlaybackDetails, userData, setUserData, enrollLoading, setEnrollLoading, setPaymentDetails, setOrderDetails, fetchingEnrolledCourses, fetchingAllCourses
     }
 
     return (
