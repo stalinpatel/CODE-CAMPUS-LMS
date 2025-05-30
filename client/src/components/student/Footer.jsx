@@ -11,7 +11,7 @@ const Footer = () => {
             <p className="mt-6 text-center md:text-left text-sm text-white/80">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text.</p>
           </div>
           <div className="flex flex-col md:items-start items-center w-full">
-            <h2 className="font-semibold text-white mb-5">Company</h2>
+            <h2 className="font-semibold text-white mb-5">Stalin Patel</h2>
             <ul className="flex md:flex-col w-full justify-between text-sm text-white/80 md:space-y-2">
               <li><a href="#">Home</a></li>
               <li><a href="#">About us</a></li>
@@ -28,7 +28,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <p className="py-4 text-center text-xs md:text-sm text-white/60">Copyright 2024 © GreatStack. All Right Reserved.</p>
+        <p className="py-4 text-center text-xs md:text-sm text-white/60">Copyright 2024 © Stalin Patel. All Right Reserved.</p>
       </footer>
     </div>
   );
