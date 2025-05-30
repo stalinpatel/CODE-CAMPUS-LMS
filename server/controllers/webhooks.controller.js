@@ -36,6 +36,7 @@ export const clerkWebhooks = async (req, res) => {
     // ✅ HANDLE EVENTS BASED ON TYPE
     switch (type) {
       case "user.created": {
+        console.log("user.created event received :", data);
         // ✅ STRUCTURE USER DATA FROM CLERK
         const userData = {
           _id: data.id,
@@ -52,6 +53,8 @@ export const clerkWebhooks = async (req, res) => {
       }
 
       case "user.updated": {
+        console.log("user.updated event received :", data);
+
         const userData = {
           name: `${data.first_name} ${data.last_name}`,
           email: data.email_addresses[0].email_address,
@@ -66,6 +69,8 @@ export const clerkWebhooks = async (req, res) => {
       }
 
       case "user.deleted": {
+        console.log("user.created deleted received :", data);
+
         // ✅ DELETE USER FROM DB
         await User.findByIdAndDelete(data.id);
 
