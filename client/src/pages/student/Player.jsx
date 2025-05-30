@@ -11,7 +11,7 @@ import { toast } from "react-toastify"
 
 const Player = () => {
   const { courseId } = useParams();
-  const { enrolledCourses, calculatePlaybackDetails, formatDuration, handlePlural, } = useContext(AppContext)
+  const { enrolledCourses, calculatePlaybackDetails, formatDuration, handlePlural, getRatingDetails, userData } = useContext(AppContext)
   const [courseData, setCourseData] = useState(null)
   const [playerData, setPlayerData] = useState(null)
   const [openedContents, setOpenedContents] = useState([])
@@ -20,14 +20,20 @@ const Player = () => {
   const [markCompletedLoader, setMarkCompletedLoader] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentPlayingLectureId, setCurrentPlayingLectureId] = useState(null)
+  const [courseProgressData, setCourseProgressData] = useState(null)
+  const [initialRating, setInitialRating] = useState(0)
 
   useEffect(() => {
     if (enrolledCourses && enrolledCourses.length > 0) {
       const findCourse = enrolledCourses.find(course => course._id === courseId);
       setCourseData(findCourse);
+      fetchInitialRating(findCourse.courseRatings);
     }
   }, [enrolledCourses, courseId]);
 
+  useEffect(() => {
+    fetchCourseProgress();
+  }, [])
 
   const toggleDropdown = (chapterId) => {
     setOpenedContents((prev) =>
@@ -60,19 +66,31 @@ const Player = () => {
       console.log('Error in Submiting Your Rating');
       toast.error(error?.response?.data?.message || "Unable to rate")
     } finally {
-      console.log("Rating done");
       setRatingOngoing(false)
+    }
+  }
+
+  const fetchCourseProgress = async () => {
+    try {
+      const res = await axiosInstance.post("/user/get-course-progress", { courseId })
+      setCourseProgressData(res.data?.progressData)
+    } catch (error) {
+      console.log('Error in fetch Course Progress');
+      toast.error(error?.response?.data?.message || "Unable to fetch Course Progress data")
     }
   }
 
   const markAsCompleted = async () => {
     try {
       setMarkCompletedLoader(true)
+      // Optimistic update
+      setCourseProgressData((prev) => ({
+        ...prev,
+        lectureCompleted: [...(prev?.lectureCompleted || []), currentPlayingLectureId]
+      }));
+      setIsCompleted(true);
       const res = await axiosInstance.post("/user/update-course-progress", { courseId, lectureId: currentPlayingLectureId })
-      console.log('res.data', res.data);
-
       if (res?.data?.success) {
-        setIsCompleted(true)
         toast.success("Marked as Completed.")
       } else {
         toast.error(res.data?.message || "Couldn't mark as completed")
@@ -86,8 +104,22 @@ const Player = () => {
     }
   }
 
-  const playbackDetails = courseData ? calculatePlaybackDetails(courseData) : null;
+  const fetchInitialRating = (ratingsArray) => {
+    let userRating;
+    if (userData?._id) {
+      userRating = ratingsArray.find(item => item.userId === userData._id)
+    }
+    if (userRating) {
+      setInitialRating(userRating.rating)
+      return;
+    } else if (ratingsArray?.length) {
+      const { starsCount } = getRatingDetails(ratingsArray);
+      setInitialRating(starsCount);
+      return;
+    }
+  }
 
+  const playbackDetails = courseData ? calculatePlaybackDetails(courseData) : null;
 
   if (!courseData) {
     return (<>
@@ -98,6 +130,7 @@ const Player = () => {
       </div >
     </>)
   }
+
   return (
     <>
       <div className="p-4 sm:p-8 md:px-20 flex flex-col-reverse md:grid md:grid-cols-2 gap-6 max-w-screen-xl mx-auto">
@@ -128,8 +161,8 @@ const Player = () => {
                         {
                           chapter.chapterContent.map((lecture, lectureNo) => {
                             return (
-                              <li key={lecture?.lectureId} className="flex items-start gap-2 py-1">
-                                <img src={false ? assets.blueTickIcon : assets.playIcon} alt="bullet icon" className="w-4 h-4 mt-1" />
+                              <li key={`${lecture?.lectureId}-${lectureNo}`} className="flex items-start gap-2 py-1">
+                                <img src={(courseProgressData?.lectureCompleted || []).includes(lecture?.lectureId) ? assets.blueTickIcon : assets.playIcon} alt="bullet icon" className="w-4 h-4 mt-1" />
 
                                 <div className="flex items-center justify-between w-full text-gray-800 text-xs md:text-default">
                                   <p>{lecture.lectureTitle}</p>
@@ -151,7 +184,7 @@ const Player = () => {
             {/* Rating div */}
             <div className='flex items-center max-sm:flex-col gap-2 py-3 mt-10'>
               <h1 className='text-xl font-bold my-4'>Rate this course :</h1>
-              <Rating initialRating={0} onRate={handleRatingClick} isProcessingRating={ratingOngoing} />
+              <Rating initialRating={initialRating} onRate={handleRatingClick} isProcessingRating={ratingOngoing} />
             </div>
           </div>
         </div>
@@ -175,6 +208,9 @@ const Player = () => {
                   opts={{ playerVars: { autoplay: 1, mute: 1 } }}
                   iframeClassName="w-full aspect-video"
                   onReady={() => setIsPlayerLoading(false)}
+                  onError={() => {
+                    toast.error("Failed to load video. Try again later.");
+                  }}
                 />
               </div>
             ) : (
@@ -195,8 +231,9 @@ const Player = () => {
               <button
                 disabled={isCompleted}
                 onClick={markAsCompleted}
-                className="text-blue-600 font-semibold hover:underline transition duration-200">
-                {isCompleted ? "Completed" : "Mark as Completed"}
+                className="text-blue-600 font-semibold flex items-center justify-center hover:underline transition duration-200">
+                {markCompletedLoader ? <Spinner /> : isCompleted || (courseProgressData?.lectureCompleted || []).includes(currentPlayingLectureId)
+                  ? "Completed" : "Mark as Completed"}
               </button>
             }
 
