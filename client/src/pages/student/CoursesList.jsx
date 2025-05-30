@@ -5,24 +5,34 @@ import SearchBar from '../../components/student/SearchBar';
 import { useParams } from 'react-router-dom';
 import CoursesCard from '../../components/student/CoursesCard';
 import Footer from '../../components/student/Footer';
+import Spinner from "../../components/student/Spinner"
 
 const CoursesList = () => {
-  const { navigate, allCourses } = useContext(AppContext)
+  const { navigate, allCourses, fetchingAllCourses } = useContext(AppContext)
   const { input } = useParams();
-  const [filteredCourse, setFilteredCourse] = useState([])
-
+  const [filteredCourse, setFilteredCourse] = useState(allCourses || []);
   useEffect(() => {
     if (allCourses && allCourses.length > 0) {
       const tempCourses = allCourses.slice()
-      input
-        ? setFilteredCourse(
-          tempCourses.filter(item => item.title.toLowerCase().includes(input.toLowerCase()))
-        )
-        : setFilteredCourse(tempCourses);
+      const searchTerm = input?.toLowerCase() || '';
+
+      setFilteredCourse(
+        searchTerm
+          ? tempCourses.filter(item =>
+            item?.courseTitle?.toLowerCase()?.includes(searchTerm)
+          )
+          : tempCourses
+      );
     }
   }, [allCourses, input])
 
-
+  if (fetchingAllCourses) {
+    return (
+      <div className='w-full flex items-center justify-center my-20 scale-150'>
+        <Spinner />
+      </div>
+    )
+  }
   return (
     <>
       <div className='flex w-full flex-col px-8 sm:px-16 md:px-20 lg:px-40 '>
@@ -42,12 +52,12 @@ const CoursesList = () => {
             <span>{input}</span>
             <img onClick={() => {
               navigate("/course-list")
-              setFilteredCourse(allCourses);
+              setFilteredCourse(allCourses || []);
             }} src={assets.crossIcon} width={12} alt="cross_icon" className='cursor-pointer' />
           </div>
         }
         {
-          filteredCourse.length === 0 && (
+          !fetchingAllCourses && filteredCourse.length === 0 && (
             <div className="text-center w-full text-gray-500 my-8 text-lg">
               No results found for <span className="font-medium text-gray-700">"{input}"</span>
             </div>
@@ -55,11 +65,9 @@ const CoursesList = () => {
         }
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-4 sm:gap-6 md:gap-8 '>
           {
-            filteredCourse.map((course, index) => {
-              return (
-                <CoursesCard key={index} course={course} />
-              )
-            })
+            filteredCourse.map((course, index) => (
+              <CoursesCard key={index} course={course} />
+            ))
           }
         </div>
       </div>
