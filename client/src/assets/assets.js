@@ -45,7 +45,7 @@ import userIcon2Img from "./user_icon_2.svg";
 import walmartLogoImg from "./walmart_logo.svg";
 import paymentSuccessIcon from "./success.png";
 import paymentFailedIcon from "./failed.png";
-import codeCampusLogo from "./codeCampusLogo.png";
+import codeCampusLogo from "./CodeCampusLogo.png";
 import codeCampusLogoDarkTheme from "./codeCampusLogoDarkTheme.png";
 
 const assets = {
