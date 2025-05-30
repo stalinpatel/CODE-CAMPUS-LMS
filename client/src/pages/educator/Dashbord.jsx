@@ -53,7 +53,7 @@ const Dashbord = () => {
                     {/* <div className="text-3xl">💰</div> */}
                     <img src={assets.earningIcon} alt="earning icon" />
                     <div>
-                        <div className="text-xl font-bold">{currency}{dashbordData?.totalEarnings}</div>
+                        <div className="text-xl font-bold">{currency}{dashbordData?.totalEarnings.toFixed(2)}</div>
                         <div className="text-gray-500 text-sm">Total Earnings</div>
                     </div>
                 </div>
