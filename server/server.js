@@ -33,7 +33,7 @@ app.use(clerkMiddleware());
 //ROUTES
 app.use("/api/educator", educatorRouter); //DONE
 app.use("/api/course", courseRouter); //DONE
-app.use("/api/user", userRouter);
+app.use("/api/user", userRouter); //DONE
 app.use("/api/payment", paymentRouter); //DONE
 
 //DEFAULT ROUTE

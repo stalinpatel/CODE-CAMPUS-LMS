@@ -114,10 +114,57 @@ export const updateRoleEducator = async (req, res) => {
       .status(200)
       .json({ success: true, message: "You can publish a  course now" });
   } catch (error) {
-    console.error("Clerk role update failed:", error);
+    console.error(
+      "Error in updateRoleEducator controler , Clerk role update failed:",
+      error
+    );
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+
+//TOGGLE COURSE PUBLISH STATUS
+export const toggleCoursePublish = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isPublished } = req.body;
+
+    if (typeof isPublished !== "boolean") {
+      return res
+        .status(400)
+        .json({ success: false, message: "isPublished must be a boolean" });
+    }
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
+    }
+
+    if (course.educator.toString() !== req.auth.userId) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized action" });
+    }
+
+    course.isPublished = isPublished;
+    await course.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Course ${
+        isPublished ? "published" : "unpublished"
+      } successfully`,
+      course,
+    });
+  } catch (err) {
+    console.error("toggleCoursePublish error:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error, try again later" });
+  }
+};
+
 // GET EDUCATOR COURSES
 export const getEducatorCourses = async (req, res) => {
   try {

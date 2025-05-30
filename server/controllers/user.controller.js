@@ -33,13 +33,11 @@ export const userEnrolledCourses = async (req, res) => {
   }
 };
 
-//UPDATE USERCOURSE PROGRESS
+//MARK USERCOURSE PROGRESS AS COMPLETED
 export const markUserCourseProgress = async (req, res) => {
   try {
     const userId = req.auth.userId;
     const { courseId, lectureId } = req.body;
-    console.log("courseId", courseId);
-    console.log("lectureId", lectureId);
 
     const progressData = await CourseProgress.findOne({ userId, courseId });
 
@@ -64,6 +62,9 @@ export const markUserCourseProgress = async (req, res) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
+
+//UNMARK USERCOURSE PROGRESS AS COMPLETED
+
 export const unmarkUserCourseProgress = async (req, res) => {
   try {
     const userId = req.auth.userId;

@@ -12,9 +12,9 @@ const userRouter = express.Router();
 
 userRouter.get("/data", getUserData); //DONE
 userRouter.get("/enrolled-courses", userEnrolledCourses); //DONE
-userRouter.post("/mark-course-progress", markUserCourseProgress);//DONE
-userRouter.post("/unmark-course-progress", unmarkUserCourseProgress);
+userRouter.post("/mark-course-progress", markUserCourseProgress); //DONE
+userRouter.post("/unmark-course-progress", unmarkUserCourseProgress); //DONE
 userRouter.post("/get-course-progress", getUserCourseProgress); //DONE
-userRouter.post("/add-rating", addUserRating);
+userRouter.post("/add-rating", addUserRating); //DONE
 
 export default userRouter;

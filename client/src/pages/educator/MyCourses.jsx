@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Switch from "../../components/educator/Switch";
 import { AppContext } from "../../context/AppContext";
 import Loading from "../../components/student/Loading";
+import { toast } from "react-toastify"
 import axiosInstance from "../../utils/axios.js";
 
 export default function MyCourses() {
@@ -16,6 +17,37 @@ export default function MyCourses() {
       console.log('Error Fetching my-courses :', error.message);
     }
   }
+  const handleTogglePublish = async (courseId, currentStatus) => {
+    // Store original status
+    const originalStatus = currentStatus;
+
+    // Optimistically update UI
+    setCourses(prevCourses =>
+      prevCourses.map(course =>
+        course._id === courseId ? { ...course, isPublished: !originalStatus } : course
+      )
+    );
+
+    try {
+      const res = await axiosInstance.patch(`/educator/toggle-publish/${courseId}`, {
+        isPublished: !originalStatus,
+      });
+
+      toast.success(res.data?.message || "Toggled Successfully");
+    } catch (error) {
+      // Revert back to original status
+      setCourses(prevCourses =>
+        prevCourses.map(course =>
+          course._id === courseId ? { ...course, isPublished: originalStatus } : course
+        )
+      );
+
+      console.error("Error toggling publish status:", error.message);
+      toast.error(error?.response?.data?.message || "Unable to toggle");
+    }
+  };
+
+
   useEffect(() => {
     fetchEducatorCourses()
   }, [allCourses])
@@ -81,7 +113,10 @@ export default function MyCourses() {
 
               {/* Status - Always visible */}
               <div className="col-span-8 sm:col-span-3 mt-2 sm:mt-0 flex items-center  sm:justify-center px-2 justify-end gap-x-2">
-                <Switch checked={course.isPublished} />
+                <Switch
+                  checked={course.isPublished}
+                  onChange={() => handleTogglePublish(course._id, course.isPublished)}
+                />
                 <span className="text-xs hidden lg:block">
                   {course.live ? "Live" : "Private"}
                 </span>

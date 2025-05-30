@@ -5,6 +5,7 @@ import {
   getEducatorCourses,
   educatorDashboardData,
   getEnrolledStudentsData,
+  toggleCoursePublish,
 } from "../controllers/educator.controller.js";
 import upload from "../configs/multer.config.js";
 import protectEducator from "../middlewares/auth.middleware.js";
@@ -21,6 +22,11 @@ educatorRouter.post(
 ); //DONE
 educatorRouter.get("/courses", protectEducator, getEducatorCourses); //DONE
 educatorRouter.get("/dashboard", protectEducator, educatorDashboardData); //DONE
+educatorRouter.patch(
+  "/toggle-publish/:id",
+  protectEducator,
+  toggleCoursePublish
+); //DONE
 educatorRouter.get(
   "/enrolled-students",
   protectEducator,
