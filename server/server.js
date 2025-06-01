@@ -12,11 +12,14 @@ import paymentRouter from "./routes/payment.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const isDev = process.env.NODE_ENV === "development";
 
-const CLIENT_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:5173"
-    : process.env.CLIENT_URL;
+const allowedOrigins = isDev
+  ? ["http://localhost:5173", "http://127.0.0.1:5173"]
+  : process.env.ALLOWED_ORIGINS?.split(",").map((origin) => origin.trim()) || [
+      "https://code-campus-lms-frontend.vercel.app",
+      "https://code-campus.vercel.app",
+    ];
 
 // CONNECT TO DATABASE
 await connectDB();
@@ -25,14 +28,22 @@ await connectCloudinary();
 //WEBHOOK NEEDS UN-PARSED RAW REQ BODY , KEEP IT IN TOP
 app.post("/clerk", express.raw({ type: "*/*" }), clerkWebhooks); //put it before the express.json()
 
-console.log("CORS CLIENT_URL:", CLIENT_URL);
 //MIDDLEWARES
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn(`Blocked by CORS: ${origin}`);
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(clerkMiddleware());
 
